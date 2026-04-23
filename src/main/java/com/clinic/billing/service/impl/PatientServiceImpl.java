@@ -1,4 +1,4 @@
-package com.clinic.billing.service;
+package com.clinic.billing.service.impl;
 
 import com.clinic.billing.dto.request.CreatePatientRequest;
 import com.clinic.billing.dto.request.UpdatePatientRequest;
@@ -6,6 +6,7 @@ import com.clinic.billing.dto.response.PatientResponse;
 import com.clinic.billing.entity.Patient;
 import com.clinic.billing.entity.enums.Gender;
 import com.clinic.billing.repository.PatientRepository;
+import com.clinic.billing.service.PatientService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,8 +1,9 @@
-package com.clinic.billing.service;
+package com.clinic.billing.service.impl;
 
 import com.clinic.billing.entity.Bill;
 import com.clinic.billing.entity.BillItem;
 import com.clinic.billing.repository.BillRepository;
+import com.clinic.billing.service.InvoiceService;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.pdf.PdfDocument;

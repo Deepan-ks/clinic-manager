@@ -2,10 +2,7 @@ package com.clinic.billing.controller;
 
 import com.clinic.billing.dto.request.CreateDoctorRequest;
 import com.clinic.billing.dto.response.DoctorResponse;
-import com.clinic.billing.entity.Doctor;
 import com.clinic.billing.service.DoctorService;
-import com.clinic.billing.service.DoctorServiceImpl;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

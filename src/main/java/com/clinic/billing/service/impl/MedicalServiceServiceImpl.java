@@ -1,9 +1,10 @@
-package com.clinic.billing.service;
+package com.clinic.billing.service.impl;
 
 import com.clinic.billing.dto.request.MedicalServiceRequest;
 import com.clinic.billing.dto.response.MedicalServiceResponse;
 import com.clinic.billing.entity.MedicalService;
 import com.clinic.billing.repository.MedicalServiceRepository;
+import com.clinic.billing.service.MedicalServiceService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

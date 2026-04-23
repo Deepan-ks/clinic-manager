@@ -1,9 +1,10 @@
-package com.clinic.billing.service;
+package com.clinic.billing.service.impl;
 
 import com.clinic.billing.dto.request.CreateSpecializationRequest;
 import com.clinic.billing.dto.response.SpecializationResponse;
 import com.clinic.billing.entity.Specialization;
 import com.clinic.billing.repository.SpecializationRepository;
+import com.clinic.billing.service.SpecializationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +12,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class SpecializationServiceImpl implements SpecializationService{
+public class SpecializationServiceImpl implements SpecializationService {
 
     private final SpecializationRepository specializationRepository;
 

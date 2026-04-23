@@ -1,4 +1,4 @@
-package com.clinic.billing.service;
+package com.clinic.billing.service.impl;
 
 import com.clinic.billing.dto.request.BillItemRequest;
 import com.clinic.billing.dto.request.CancelBillRequest;
@@ -9,12 +9,12 @@ import com.clinic.billing.entity.*;
 import com.clinic.billing.entity.enums.BillStatus;
 import com.clinic.billing.entity.enums.PaymentMode;
 import com.clinic.billing.repository.*;
+import com.clinic.billing.service.BillingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -177,7 +177,6 @@ public class BillingServiceImpl implements BillingService {
                 .patientPhone(bill.getPatient().getPhone())
                 .doctorName(bill.getDoctorName())
                 .subtotal(bill.getSubtotal())
-                .totalGst(bill.getTotalGst())
                 .grandTotal(bill.getGrandTotal())
                 .discountAmount(bill.getDiscountAmount())
                 .discountPercent(bill.getDiscountPercent())

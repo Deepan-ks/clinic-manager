@@ -7,4 +7,5 @@
 
     <include file="/db/changelog/tables/db.changelog.create-tables.xml"/>
     <include file="db/changelog/tables/db.changelog.add-discount-columns.xml"/>
+    <include file="db/changelog/tables/db.changelog.table-doctor-specialization.xml"/>
 </databaseChangeLog>

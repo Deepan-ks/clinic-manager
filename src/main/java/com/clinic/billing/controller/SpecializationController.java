@@ -2,9 +2,7 @@ package com.clinic.billing.controller;
 
 import com.clinic.billing.dto.request.CreateSpecializationRequest;
 import com.clinic.billing.dto.response.SpecializationResponse;
-import com.clinic.billing.entity.Specialization;
 import com.clinic.billing.service.SpecializationService;
-import com.clinic.billing.service.SpecializationServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

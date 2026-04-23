@@ -1,4 +1,4 @@
-package com.clinic.billing.service;
+package com.clinic.billing.service.impl;
 
 import com.clinic.billing.dto.request.CreateDoctorRequest;
 import com.clinic.billing.dto.response.DoctorResponse;
@@ -6,10 +6,10 @@ import com.clinic.billing.entity.Doctor;
 import com.clinic.billing.entity.Specialization;
 import com.clinic.billing.repository.DoctorRepository;
 import com.clinic.billing.repository.SpecializationRepository;
+import com.clinic.billing.service.DoctorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service

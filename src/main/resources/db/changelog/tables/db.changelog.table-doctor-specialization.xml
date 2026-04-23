@@ -1,0 +1,122 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <!-- ========================= -->
+    <!-- 1. SPECIALIZATION TABLE  -->
+    <!-- ========================= -->
+    <changeSet id="002-create-specialization" author="deepan">
+
+        <createTable tableName="specializations">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="status" type="VARCHAR(20)" defaultValue="ACTIVE"/>
+        </createTable>
+
+    </changeSet>
+
+
+    <!-- ========================= -->
+    <!-- 2. DOCTOR TABLE          -->
+    <!-- ========================= -->
+    <changeSet id="003-create-doctor" author="deepan">
+
+        <createTable tableName="doctors">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+
+            <column name="name" type="VARCHAR(150)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="phone" type="VARCHAR(20)"/>
+
+            <column name="status" type="VARCHAR(20)" defaultValue="ACTIVE"/>
+
+            <column name="specialization_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- FK -->
+        <addForeignKeyConstraint
+                baseTableName="doctors"
+                baseColumnNames="specialization_id"
+                referencedTableName="specializations"
+                referencedColumnNames="id"
+                constraintName="fk_doctor_specialization"/>
+
+    </changeSet>
+
+
+    <!-- ========================= -->
+    <!-- 3. UPDATE MEDICAL SERVICE -->
+    <!-- ========================= -->
+    <changeSet id="004-update-service-specialization" author="deepan">
+
+        <addColumn tableName="services">
+            <column name="specialization_id" type="BIGINT"/>
+        </addColumn>
+
+        <addForeignKeyConstraint
+                baseTableName="services"
+                baseColumnNames="specialization_id"
+                referencedTableName="specializations"
+                referencedColumnNames="id"
+                constraintName="fk_service_specialization"/>
+
+    </changeSet>
+
+
+    <!-- ========================= -->
+    <!-- 4. UPDATE BILL TABLE     -->
+    <!-- ========================= -->
+    <changeSet id="005-update-bill-doctor" author="deepan">
+
+        <addColumn tableName="bills">
+
+            <column name="doctor_id" type="BIGINT"/>
+
+            <column name="specialization_id" type="BIGINT"/>
+
+        </addColumn>
+
+        <addForeignKeyConstraint
+                baseTableName="bills"
+                baseColumnNames="doctor_id"
+                referencedTableName="doctors"
+                referencedColumnNames="id"
+                constraintName="fk_bill_doctor"/>
+
+        <addForeignKeyConstraint
+                baseTableName="bills"
+                baseColumnNames="specialization_id"
+                referencedTableName="specializations"
+                referencedColumnNames="id"
+                constraintName="fk_bill_specialization"/>
+
+    </changeSet>
+
+
+    <!-- ========================= -->
+    <!-- 5. UPDATE PATIENT TABLE  -->
+    <!-- ========================= -->
+    <changeSet id="006-update-patient-address" author="deepan">
+
+        <addColumn tableName="patients">
+            <column name="address" type="VARCHAR(255)"/>
+        </addColumn>
+
+    </changeSet>
+
+</databaseChangeLog>
