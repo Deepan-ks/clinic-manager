@@ -11,31 +11,31 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/v1/services")
 @RequiredArgsConstructor
 public class MedicalServiceController {
 
     private final MedicalServiceService medicalServiceService;
 
-    @GetMapping("/services")
+    @GetMapping
     public ResponseEntity<List<MedicalServiceResponse>> getActiveMedicalService(){
         List<MedicalServiceResponse> allActiveServices = medicalServiceService.getAllActiveServices();
         return ResponseEntity.ok().body(allActiveServices);
     }
 
-    @PostMapping("/services")
+    @PostMapping
     public ResponseEntity<MedicalServiceResponse> createMedicalService(@RequestBody @Valid MedicalServiceRequest medicalServiceRequest){
         MedicalServiceResponse response = medicalServiceService.createMedicalService(medicalServiceRequest);
         return ResponseEntity.ok().body(response);
     }
 
-    @PutMapping("/services/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<MedicalServiceResponse> updateMedicalService(@PathVariable Long id, @RequestBody @Valid MedicalServiceRequest medicalServiceRequest){
         MedicalServiceResponse response = medicalServiceService.updateMedicalService(id, medicalServiceRequest);
         return ResponseEntity.ok().body(response);
     }
 
-    @DeleteMapping("/services/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteMedicalService(@PathVariable Long id){
         medicalServiceService.deleteMedicalService(id);
         return ResponseEntity.ok().body("Medical Service has been deleted");

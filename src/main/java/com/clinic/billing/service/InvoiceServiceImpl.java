@@ -15,7 +15,6 @@ import com.itextpdf.layout.element.*;
 import com.itextpdf.layout.properties.HorizontalAlignment;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
-import com.itextpdf.layout.properties.VerticalAlignment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -42,32 +41,28 @@ public class InvoiceServiceImpl implements InvoiceService {
         Document document = new Document(pdf);
 
         // =========================
-        // HEADER
+        // CLINIC HEADER (CLEAN STYLE)
         // =========================
 
-        Image logo = loadLogo();
-
-        Table header = new Table(UnitValue.createPercentArray(new float[]{1, 4}))
-                .useAllAvailableWidth();
-
-        header.addCell(new Cell()
-                .add(logo)
-                .setBorder(Border.NO_BORDER)
-                .setVerticalAlignment(VerticalAlignment.MIDDLE)
-                .setHeight(80));
-
-        header.addCell(new Cell()
-                .add(new Paragraph("MEDISMILE HEALTH CARE").setBold().setFontSize(22))
-                .add(new Paragraph("19/A, Rani Gardens, SIHS colony road, Singanallur, Coimbatore 641005").setFontSize(10))
-                .add(new Paragraph("Email: medismilehc@gmail.com     Phone: +91 9342639317").setFontSize(10))
-                .setBorder(Border.NO_BORDER)
-                .setVerticalAlignment(VerticalAlignment.MIDDLE));
-
-        document.add(header);
-        LineSeparator headerLine = new LineSeparator(new SolidLine());
-        document.add(headerLine);
         document.add(space(1));
 
+        document.add(new Paragraph("MEDISMILE HEALTH CARE")
+                .setBold()
+                .setFontSize(22)
+                .setTextAlignment(TextAlignment.LEFT));
+
+        // underline
+        LineSeparator headerLine = new LineSeparator(new SolidLine());
+        headerLine.setWidth(UnitValue.createPercentValue(80));
+        headerLine.setHorizontalAlignment(HorizontalAlignment.LEFT);
+        document.add(headerLine);
+
+        // address
+        document.add(new Paragraph("19/A, Rani Gardens, SIHS colony road, Singanallur, Coimbatore 641005 \n" +
+                "Email: medismilehc@gmail.com     Phone: +91 9342639317")
+                .setFontSize(12));
+
+        document.add(space(2));
 
 
         // =========================
@@ -186,11 +181,11 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         table.addCell(empty(4));
         table.addCell(summaryLabel("Discount (₹)"));
-        table.addCell(summaryValue("₹ 0"));
+        table.addCell(summaryValue("₹ " + bill.getDiscountAmount()));
 
         table.addCell(empty(4));
         table.addCell(summaryLabel("Discount (%)"));
-        table.addCell(summaryValue("0%"));
+        table.addCell(summaryValue("% " +  bill.getDiscountPercent()));
 
         table.addCell(empty(4));
         table.addCell(totalLabel("Total").setBorderTop(new SolidBorder(1)));

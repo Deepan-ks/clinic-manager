@@ -1,0 +1,90 @@
+package com.clinic.billing.service;
+
+import com.clinic.billing.dto.request.CreateDoctorRequest;
+import com.clinic.billing.dto.response.DoctorResponse;
+import com.clinic.billing.entity.Doctor;
+import com.clinic.billing.entity.Specialization;
+import com.clinic.billing.repository.DoctorRepository;
+import com.clinic.billing.repository.SpecializationRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class DoctorServiceImpl implements DoctorService {
+
+    private final DoctorRepository doctorRepository;
+    private final SpecializationRepository specializationRepository;
+
+    public DoctorResponse createDoctor(CreateDoctorRequest req) {
+
+        Specialization spec = findSpecialization(req.getSpecializationId());
+
+        Doctor doctor = Doctor.builder()
+                .name(req.getName())
+                .specialization(spec)
+                .phone(req.getPhone())
+                .status(Boolean.TRUE.equals(req.getIsActive()) ? "ACTIVE" : "INACTIVE")
+                .build();
+
+        return mapToResponse(doctorRepository.save(doctor));
+    }
+
+    public List<DoctorResponse> getAllDoctor(Long specializationId) {
+
+        List<Doctor> doctors = (specializationId != null)
+                ? doctorRepository.findBySpecializationId(specializationId)
+                : doctorRepository.findAll();
+
+        return doctors.stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    public DoctorResponse getByDoctorId(Long id) {
+        return mapToResponse(findDoctor(id));
+    }
+
+    public DoctorResponse updateDoctor(Long id, CreateDoctorRequest req) {
+
+        Doctor doctor = findDoctor(id);
+        Specialization spec = findSpecialization(req.getSpecializationId());
+
+        doctor.setName(req.getName());
+        doctor.setPhone(req.getPhone());
+        doctor.setSpecialization(spec);
+        doctor.setStatus(Boolean.TRUE.equals(req.getIsActive()) ? "ACTIVE" : "INACTIVE");
+
+        return mapToResponse(doctorRepository.save(doctor));
+    }
+
+    public void deleteDoctor(Long id) {
+        Doctor doctor = findDoctor(id);
+
+        // soft delete
+        doctor.setStatus("INACTIVE");
+        doctorRepository.save(doctor);
+    }
+
+    private Doctor findDoctor(Long id) {
+        return doctorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+    }
+
+    private Specialization findSpecialization(Long id) {
+        return specializationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Specialization not found"));
+    }
+
+    private DoctorResponse mapToResponse(Doctor d) {
+        return DoctorResponse.builder()
+                .doctorId(d.getId())
+                .doctorName(d.getName())
+                .specializationId(d.getSpecialization().getId())
+                .specializationName(d.getSpecialization().getName())
+                .build();
+    }
+}

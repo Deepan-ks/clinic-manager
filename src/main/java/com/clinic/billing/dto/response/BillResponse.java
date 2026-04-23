@@ -1,14 +1,16 @@
 package com.clinic.billing.dto.response;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class BillResponse {
 
     private Long id;
@@ -16,11 +18,13 @@ public class BillResponse {
 
     private String patientName;
     private String patientPhone;
+    private String patientAddress;
 
     private String doctorName;
 
     private BigDecimal subtotal;
-    private BigDecimal totalGst;
+    private BigDecimal discountAmount;
+    private BigDecimal discountPercent;
     private BigDecimal grandTotal;
 
     private String paymentMode;

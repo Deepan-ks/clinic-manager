@@ -58,6 +58,22 @@ public class Bill {
     @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BillItem> items;
 
+    @ManyToOne
+    @JoinColumn(name = "doctor_id")
+    private Doctor doctor;
+
+    @ManyToOne
+    @JoinColumn(name = "specialization_id")
+    private Specialization specialization;
+
+    @Column(name = "discount_amount", nullable = false, precision = 10, scale = 2)
+    @Builder.Default
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+
+    @Column(name = "discount_percent", nullable = false, precision = 5, scale = 2)
+    @Builder.Default
+    private BigDecimal discountPercent = BigDecimal.ZERO;
+
     @Column(nullable = false)
     private LocalDateTime createdTime;
 

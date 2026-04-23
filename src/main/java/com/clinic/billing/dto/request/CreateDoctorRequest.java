@@ -6,9 +6,10 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdatePatientRequest {
+public class CreateDoctorRequest {
 
+    private String name;
+    private Long specializationId;
     private String phone;
-    private String email;
-    private String address;
+    private Boolean isActive;
 }

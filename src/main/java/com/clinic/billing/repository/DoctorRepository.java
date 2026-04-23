@@ -1,0 +1,13 @@
+package com.clinic.billing.repository;
+
+import com.clinic.billing.dto.response.DoctorResponse;
+import com.clinic.billing.entity.Doctor;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface DoctorRepository extends JpaRepository<Doctor, Long> {
+    List<Doctor> findBySpecializationId(Long specializationId);
+}

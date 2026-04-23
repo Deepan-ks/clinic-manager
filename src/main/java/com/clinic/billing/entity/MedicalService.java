@@ -31,6 +31,10 @@ public class MedicalService {
     @Column(nullable = false)
     private Boolean isActive;
 
+    @ManyToOne
+    @JoinColumn(name = "specialization_id")
+    private Specialization specialization;
+
     @Column(nullable = false)
     private LocalDateTime createdTime;
 

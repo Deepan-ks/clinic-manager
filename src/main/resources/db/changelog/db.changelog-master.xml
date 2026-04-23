@@ -6,4 +6,5 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
 
     <include file="/db/changelog/tables/db.changelog.create-tables.xml"/>
+    <include file="db/changelog/tables/db.changelog.add-discount-columns.xml"/>
 </databaseChangeLog>

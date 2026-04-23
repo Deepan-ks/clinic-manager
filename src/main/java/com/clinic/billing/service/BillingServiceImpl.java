@@ -5,15 +5,10 @@ import com.clinic.billing.dto.request.CancelBillRequest;
 import com.clinic.billing.dto.request.CreateBillRequest;
 import com.clinic.billing.dto.response.BillItemResponse;
 import com.clinic.billing.dto.response.BillResponse;
-import com.clinic.billing.entity.Bill;
-import com.clinic.billing.entity.BillItem;
-import com.clinic.billing.entity.MedicalService;
-import com.clinic.billing.entity.Patient;
+import com.clinic.billing.entity.*;
 import com.clinic.billing.entity.enums.BillStatus;
 import com.clinic.billing.entity.enums.PaymentMode;
-import com.clinic.billing.repository.BillRepository;
-import com.clinic.billing.repository.MedicalServiceRepository;
-import com.clinic.billing.repository.PatientRepository;
+import com.clinic.billing.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,79 +26,93 @@ public class BillingServiceImpl implements BillingService {
     private final BillRepository billRepository;
     private final MedicalServiceRepository medicalServiceRepository;
     private final PatientRepository patientRepository;
+    private final DoctorRepository doctorRepository;
+    private final SpecializationRepository specializationRepository;
 
     @Transactional
     @Override
     public BillResponse createBill(CreateBillRequest request) {
-        // 🔹 1. Fetch patient
+
         Patient patient = patientRepository.findById(request.getPatientId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
-        List<BillItem> billItems = new ArrayList<>();
+        Doctor doctor = doctorRepository.findById(request.getDoctorId())
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
 
-        BigDecimal subtotal = BigDecimal.ZERO;
-        BigDecimal totalGst = BigDecimal.ZERO;
+        Specialization specialization = specializationRepository
+                .findById(request.getSpecializationId())
+                .orElseThrow(() -> new RuntimeException("Specialization not found"));
 
-        for(BillItemRequest item : request.getItems()) {
-            MedicalService medicalService = medicalServiceRepository.findById(item.getServiceId())
-                    .orElseThrow(() -> new RuntimeException("Service not found"));
-
-            BigDecimal quantity = BigDecimal.valueOf(item.getQuantity());
-
-            BigDecimal unitPrice = medicalService.getPrice();
-            BigDecimal gstPercentage = medicalService.getGstPercentage();
-
-            // GST calculation
-            BigDecimal gstAmount = unitPrice
-                    .multiply(quantity)
-                    .multiply(gstPercentage)
-                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-
-            BigDecimal lineTotal = unitPrice
-                    .multiply(quantity)
-                    .add(gstAmount);
-
-            subtotal = subtotal.add(unitPrice.multiply(quantity));
-            totalGst = totalGst.add(gstAmount);
-
-            // Create BillItem
-            BillItem billItem = BillItem.builder()
-                    .service(medicalService)
-                    .serviceName(medicalService.getName()) // snapshot
-                    .quantity(item.getQuantity())
-                    .unitPrice(unitPrice)
-                    .gstPercentage(gstPercentage)
-                    .gstAmount(gstAmount)
-                    .lineTotal(lineTotal)
-                    .build();
-
-            billItems.add(billItem);
+        // 🔥 VALIDATION
+        if (!doctor.getSpecialization().getId().equals(specialization.getId())) {
+            throw new RuntimeException("Doctor does not belong to specialization");
         }
 
-        BigDecimal grandTotal = subtotal.add(totalGst);
+        List<BillItem> billItems = new ArrayList<>();
+        BigDecimal subtotal = BigDecimal.ZERO;
 
-        // 🔹 3. Create Bill
+        for (BillItemRequest item : request.getItems()) {
+
+            MedicalService service = medicalServiceRepository.findById(item.getServiceId())
+                    .orElseThrow(() -> new RuntimeException("Service not found"));
+
+            // 🔥 VALIDATION
+            if (!service.getSpecialization().getId().equals(specialization.getId())) {
+                throw new RuntimeException("Service does not belong to specialization");
+            }
+
+            BigDecimal qty = BigDecimal.valueOf(item.getQuantity());
+            BigDecimal lineTotal = service.getPrice().multiply(qty);
+
+            subtotal = subtotal.add(lineTotal);
+
+            billItems.add(
+                    BillItem.builder()
+                            .service(service)
+                            .serviceName(service.getName())
+                            .quantity(item.getQuantity())
+                            .unitPrice(service.getPrice())
+                            .lineTotal(lineTotal)
+                            .build()
+            );
+        }
+
+        // 🔥 DISCOUNT LOGIC
+        BigDecimal discountAmount = request.getDiscountAmount() != null
+                ? request.getDiscountAmount() : BigDecimal.ZERO;
+
+        BigDecimal discountPercent = request.getDiscountPercent() != null
+                ? request.getDiscountPercent() : BigDecimal.ZERO;
+
+        BigDecimal discountValue = discountPercent.compareTo(BigDecimal.ZERO) > 0
+                ? subtotal.multiply(discountPercent).divide(BigDecimal.valueOf(100))
+                : discountAmount;
+
+        if (discountValue.compareTo(subtotal) > 0) {
+            discountValue = subtotal;
+        }
+
+        BigDecimal total = subtotal.subtract(discountValue);
+
         Bill bill = Bill.builder()
                 .billNumber(generateBillNumber())
                 .patient(patient)
-                .doctorName(request.getDoctorName())
+                .doctor(doctor)
+                .specialization(specialization)
                 .subtotal(subtotal)
-                .totalGst(totalGst)
-                .grandTotal(grandTotal)
+                .discountAmount(discountValue)
+                .discountPercent(discountPercent)
+                .grandTotal(total)
                 .paymentMode(PaymentMode.valueOf(request.getPaymentMode()))
                 .status(BillStatus.ACTIVE)
-                .notes(request.getNotes())
+                .items(billItems)
                 .createdTime(LocalDateTime.now())
                 .updatedTime(LocalDateTime.now())
-                .items(billItems)
                 .build();
 
-        // 🔹 4. Link items to bill
-        billItems.forEach(item -> item.setBill(bill));
+        billItems.forEach(i -> i.setBill(bill));
 
-        // 🔹 5. Save everything
-        Bill savedBill = billRepository.save(bill);
-        return mapToResponse(savedBill);
+        return mapToResponse(billRepository.save(bill));
     }
 
     @Override
@@ -170,6 +179,8 @@ public class BillingServiceImpl implements BillingService {
                 .subtotal(bill.getSubtotal())
                 .totalGst(bill.getTotalGst())
                 .grandTotal(bill.getGrandTotal())
+                .discountAmount(bill.getDiscountAmount())
+                .discountPercent(bill.getDiscountPercent())
                 .paymentMode(bill.getPaymentMode().name())
                 .status(bill.getStatus().name())
                 .items(itemResponses)

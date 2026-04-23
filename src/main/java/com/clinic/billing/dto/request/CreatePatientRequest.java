@@ -1,8 +1,11 @@
 package com.clinic.billing.dto.request;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class CreatePatientRequest {
 
     private String name;
@@ -10,4 +13,5 @@ public class CreatePatientRequest {
     private Integer age;
     private String gender;
     private String email;
+    private String address;
 }

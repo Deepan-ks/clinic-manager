@@ -1,10 +1,12 @@
 package com.clinic.billing.dto.response;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PatientResponse {
     private Long patientId;
     private String patientName;

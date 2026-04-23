@@ -13,37 +13,37 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/patients")
 @RequiredArgsConstructor
 public class PatientController {
 
     private final PatientService patientService;
 
-    @PostMapping("/patients")
+    @PostMapping
     public ResponseEntity<PatientResponse> createPatient(@RequestBody @Valid CreatePatientRequest request) {
         PatientResponse createdPatient = patientService.createPatient(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPatient);
     }
 
-    @GetMapping("/patients/{id}")
+    @GetMapping("{id}")
     public ResponseEntity<PatientResponse> getPatientById(@PathVariable Long id) {
         PatientResponse patient = patientService.getPatient(id);
         return ResponseEntity.ok().body(patient);
     }
 
-    @GetMapping("/patients")
+    @GetMapping
     public ResponseEntity<List<PatientResponse>> getAllPatients() {
         List<PatientResponse> patientList = patientService.getAllPatients();
         return ResponseEntity.ok().body(patientList);
     }
 
-    @GetMapping("/patients/search")
+    @GetMapping("/search")
     public ResponseEntity<List<PatientResponse>> searchPatient(@RequestParam String query) {
         List<PatientResponse> patientList = patientService.searchPatient(query);
         return ResponseEntity.ok().body(patientList);
     }
 
-    @PutMapping("/patients/{id}")
+    @PutMapping("{id}")
     public ResponseEntity<PatientResponse> updatePatient(@PathVariable Long id, @RequestBody @Valid UpdatePatientRequest request) {
         PatientResponse updatedPatient = patientService.updatePatient(id, request);
         return ResponseEntity.ok().body(updatedPatient);

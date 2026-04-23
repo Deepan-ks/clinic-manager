@@ -1,18 +1,25 @@
 package com.clinic.billing.dto.response;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.math.BigDecimal;
 
-@Data
+@Getter
+@Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class BillItemResponse {
 
     private String serviceName;
+
     private Integer quantity;
+
     private BigDecimal unitPrice;
+
     private BigDecimal gstPercentage;
+
     private BigDecimal gstAmount;
+
     private BigDecimal lineTotal;
 }

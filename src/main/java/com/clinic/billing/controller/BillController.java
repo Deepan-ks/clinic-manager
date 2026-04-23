@@ -16,38 +16,38 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/v1/bills")
 @RequiredArgsConstructor
 public class BillController {
 
     private final BillingService billingService;
     private final InvoiceService invoiceService;
 
-    @PostMapping("/bills")
+    @PostMapping
     public ResponseEntity<BillResponse> generateBill(@RequestBody @Valid CreateBillRequest createBillRequest) {
         BillResponse bill = billingService.createBill(createBillRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(bill);
     }
 
-    @GetMapping("/bills/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<BillResponse> getBillById(@PathVariable Long id) {
         BillResponse bill = billingService.getBillById(id);
-        return ResponseEntity.ok().body(bill);
+        return ResponseEntity.ok(bill);
     }
 
-    @GetMapping("/bills")
+    @GetMapping
     public ResponseEntity<List<BillResponse>> getAllBills() {
         List<BillResponse> bills = billingService.getAllBills();
         return ResponseEntity.ok().body(bills);
     }
 
-    @PatchMapping("/bills/{id}/cancel")
+    @PatchMapping("/{id}/cancel")
     public ResponseEntity<String> cancelBill(@PathVariable Long id, @RequestBody @Valid CancelBillRequest cancelBillRequest) {
         billingService.cancelBill(id, cancelBillRequest);
         return ResponseEntity.ok().body("Bill has been cancelled");
     }
 
-    @GetMapping("bills/{id}/invoice")
+    @GetMapping("/{id}/invoice")
     public ResponseEntity<byte[]> generateInvoice(@PathVariable Long id) throws IOException {
 
         byte[] pdf = invoiceService.generateInvoice(id);

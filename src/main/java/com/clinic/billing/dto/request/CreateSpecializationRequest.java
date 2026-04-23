@@ -1,12 +1,14 @@
 package com.clinic.billing.dto.request;
 
+
 import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CancelBillRequest {
+public class CreateSpecializationRequest {
 
-    private String reason;
+    private String name;
+    private Boolean isActive;
 }

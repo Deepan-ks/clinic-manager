@@ -1,9 +1,13 @@
 package com.clinic.billing.dto.request;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class BillItemRequest {
+
     private Long serviceId;
     private Integer quantity;
 }
