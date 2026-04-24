@@ -32,14 +32,11 @@ public class Bill {
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
-    @Column(length = 150)
+    @Column(nullable = false, length = 150)
     private String doctorName;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal subtotal;
-
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal totalGst;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal grandTotal;
@@ -59,11 +56,11 @@ public class Bill {
     private List<BillItem> items;
 
     @ManyToOne
-    @JoinColumn(name = "doctor_id")
+    @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
 
     @ManyToOne
-    @JoinColumn(name = "specialization_id")
+    @JoinColumn(name = "specialization_id", nullable = false)
     private Specialization specialization;
 
     @Column(name = "discount_amount", nullable = false, precision = 10, scale = 2)

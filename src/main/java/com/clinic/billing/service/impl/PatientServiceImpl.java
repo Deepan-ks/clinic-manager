@@ -26,6 +26,7 @@ public class PatientServiceImpl implements PatientService {
         Patient patient = Patient.builder()
                 .name(request.getName())
                 .age(request.getAge())
+                .address(request.getAddress())
                 .gender(Gender.valueOf(request.getGender()))
                 .phone(request.getPhone())
                 .email(request.getEmail())
@@ -66,6 +67,9 @@ public class PatientServiceImpl implements PatientService {
         if(request.getEmail() != null){
             existingPatient.setEmail(request.getEmail());
         }
+        if(request.getAddress() != null){
+            existingPatient.setAddress(request.getAddress());
+        }
         patientRepository.save(existingPatient);
         return mapToPatientResponse(existingPatient);
     }
@@ -76,6 +80,7 @@ public class PatientServiceImpl implements PatientService {
                 .patientName(patient.getName())
                 .gender(String.valueOf(patient.getGender()))
                 .age(patient.getAge())
+                .address(patient.getAddress())
                 .patientPhone(patient.getPhone())
                 .build();
     }

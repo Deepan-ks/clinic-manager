@@ -17,9 +17,5 @@ public class BillItemResponse {
 
     private BigDecimal unitPrice;
 
-    private BigDecimal gstPercentage;
-
-    private BigDecimal gstAmount;
-
     private BigDecimal lineTotal;
 }

@@ -4,12 +4,15 @@ import com.clinic.billing.dto.request.CreateDoctorRequest;
 import com.clinic.billing.dto.response.DoctorResponse;
 import com.clinic.billing.entity.Doctor;
 import com.clinic.billing.entity.Specialization;
+import com.clinic.billing.entity.enums.Status;
 import com.clinic.billing.repository.DoctorRepository;
 import com.clinic.billing.repository.SpecializationRepository;
 import com.clinic.billing.service.DoctorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,13 +30,15 @@ public class DoctorServiceImpl implements DoctorService {
                 .name(req.getName())
                 .specialization(spec)
                 .phone(req.getPhone())
-                .status(Boolean.TRUE.equals(req.getIsActive()) ? "ACTIVE" : "INACTIVE")
+                .status(Status.valueOf(req.getStatus()))
+                .createdTime(LocalDateTime.now())
+                .updatedTime(LocalDateTime.now())
                 .build();
 
         return mapToResponse(doctorRepository.save(doctor));
     }
 
-    public List<DoctorResponse> getAllDoctor(Long specializationId) {
+    public List<DoctorResponse> getAllDoctorBySpecialization(Long specializationId) {
 
         List<Doctor> doctors = (specializationId != null)
                 ? doctorRepository.findBySpecializationId(specializationId)
@@ -56,7 +61,8 @@ public class DoctorServiceImpl implements DoctorService {
         doctor.setName(req.getName());
         doctor.setPhone(req.getPhone());
         doctor.setSpecialization(spec);
-        doctor.setStatus(Boolean.TRUE.equals(req.getIsActive()) ? "ACTIVE" : "INACTIVE");
+        doctor.setStatus(Status.valueOf(req.getStatus()));
+        doctor.setUpdatedTime(LocalDateTime.now());
 
         return mapToResponse(doctorRepository.save(doctor));
     }
@@ -65,8 +71,14 @@ public class DoctorServiceImpl implements DoctorService {
         Doctor doctor = findDoctor(id);
 
         // soft delete
-        doctor.setStatus("INACTIVE");
+        doctor.setStatus(Status.INACTIVE);
         doctorRepository.save(doctor);
+    }
+
+    @Override
+    public List<DoctorResponse> findAllDoctors() {
+        List<Doctor> doctors = doctorRepository.findAll();
+        return doctors.stream().map(this::mapToResponse).toList();
     }
 
     private Doctor findDoctor(Long id) {

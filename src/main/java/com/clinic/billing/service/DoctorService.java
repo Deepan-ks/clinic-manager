@@ -11,11 +11,13 @@ public interface DoctorService {
 
     DoctorResponse createDoctor(CreateDoctorRequest req);
 
-    List<DoctorResponse> getAllDoctor(Long specializationId);
+    List<DoctorResponse> getAllDoctorBySpecialization(Long specializationId);
 
     DoctorResponse getByDoctorId(Long id);
 
     DoctorResponse updateDoctor(Long id, CreateDoctorRequest req);
 
     void deleteDoctor(Long id);
+
+    List<DoctorResponse> findAllDoctors();
 }

@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -24,10 +25,16 @@ public class DoctorController {
     }
 
     @GetMapping
-    public ResponseEntity<List<DoctorResponse>> fetchAllDoctors(@RequestParam(required = false) Long specializationId) {
-        List<DoctorResponse> response = doctorService.getAllDoctor(specializationId);
+    public ResponseEntity<List<DoctorResponse>> fetchAllSpecializedDoctors(@RequestParam(required = false) Long specializationId) {
+        List<DoctorResponse> response = doctorService.getAllDoctorBySpecialization(specializationId);
         return ResponseEntity.ok(response);
     }
+
+//    @GetMapping
+//    public ResponseEntity<List<DoctorResponse>> fetchAllDoctors(){
+//        List<DoctorResponse> response = doctorService.findAllDoctors();
+//        return ResponseEntity.ok(response);
+//    }
 
     @GetMapping("/{id}")
     public ResponseEntity<DoctorResponse> fetchByDoctorId(@PathVariable Long id) {

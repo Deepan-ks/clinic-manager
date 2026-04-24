@@ -1,5 +1,6 @@
 package com.clinic.billing.entity;
 
+import com.clinic.billing.entity.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,14 +26,15 @@ public class MedicalService {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    @Column(nullable = false, precision = 5, scale = 2)
-    private BigDecimal gstPercentage;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Status status;
 
-    @Column(nullable = false)
-    private Boolean isActive;
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String description;
 
     @ManyToOne
-    @JoinColumn(name = "specialization_id")
+    @JoinColumn(name = "specialization_id", nullable = false)
     private Specialization specialization;
 
     @Column(nullable = false)

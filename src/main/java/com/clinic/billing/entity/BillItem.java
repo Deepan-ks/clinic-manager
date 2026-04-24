@@ -38,12 +38,6 @@ public class BillItem {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal unitPrice;
 
-    @Column(nullable = false, precision = 5, scale = 2)
-    private BigDecimal gstPercentage;
-
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal gstAmount;
-
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal lineTotal;
 }

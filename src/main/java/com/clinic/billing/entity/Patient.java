@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @ToString
 @Builder
-public class   Patient {
+public class Patient {
 
 
     @Id
@@ -36,6 +36,9 @@ public class   Patient {
 
     @Column(nullable = false)
     private Integer age;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String address;
 
     @Column(nullable = false)
     private LocalDateTime createdTime;

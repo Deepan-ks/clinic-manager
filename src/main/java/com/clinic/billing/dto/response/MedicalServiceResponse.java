@@ -13,5 +13,4 @@ public class MedicalServiceResponse {
     private Long serviceId;
     private String serviceName;
     private BigDecimal price;
-    private BigDecimal gstPercentage;
 }

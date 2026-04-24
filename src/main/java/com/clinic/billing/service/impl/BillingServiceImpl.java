@@ -163,8 +163,6 @@ public class BillingServiceImpl implements BillingService {
                         .serviceName(item.getServiceName())
                         .quantity(item.getQuantity())
                         .unitPrice(item.getUnitPrice())
-                        .gstPercentage(item.getGstPercentage())
-                        .gstAmount(item.getGstAmount())
                         .lineTotal(item.getLineTotal())
                         .build()
                 )

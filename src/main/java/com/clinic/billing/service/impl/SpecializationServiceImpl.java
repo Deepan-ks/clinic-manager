@@ -3,11 +3,13 @@ package com.clinic.billing.service.impl;
 import com.clinic.billing.dto.request.CreateSpecializationRequest;
 import com.clinic.billing.dto.response.SpecializationResponse;
 import com.clinic.billing.entity.Specialization;
+import com.clinic.billing.entity.enums.Status;
 import com.clinic.billing.repository.SpecializationRepository;
 import com.clinic.billing.service.SpecializationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -20,7 +22,9 @@ public class SpecializationServiceImpl implements SpecializationService {
     public SpecializationResponse createSpecialization(CreateSpecializationRequest req) {
         Specialization s = Specialization.builder()
                 .name(req.getName())
-                .status(Boolean.TRUE.equals(req.getIsActive()) ? "ACTIVE" : "INACTIVE")
+                .status(Status.valueOf(req.getStatus()))
+                .createdTime(LocalDateTime.now())
+                .updatedTime(LocalDateTime.now())
                 .build();
 
         return mapToResponse(specializationRepository.save(s));
@@ -40,7 +44,8 @@ public class SpecializationServiceImpl implements SpecializationService {
     public SpecializationResponse updateSpecialization(Long id, CreateSpecializationRequest req) {
         Specialization s = find(id);
         s.setName(req.getName());
-        s.setStatus(Boolean.TRUE.equals(req.getIsActive()) ? "ACTIVE" : "INACTIVE");
+        s.setStatus(Status.valueOf(req.getStatus()));
+        s.setUpdatedTime(LocalDateTime.now());
 
         return mapToResponse(specializationRepository.save(s));
     }
@@ -48,7 +53,7 @@ public class SpecializationServiceImpl implements SpecializationService {
     public void deleteSpecialization(Long id) {
         Specialization s = find(id);
         // soft delete
-        s.setStatus("INACTIVE");
+        s.setStatus(Status.INACTIVE);
         specializationRepository.save(s);
     }
 

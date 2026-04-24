@@ -11,6 +11,7 @@ public class PatientResponse {
     private Long patientId;
     private String patientName;
     private int age;
+    private String address;
     private String gender;
     private String patientPhone;
 }

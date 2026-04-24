@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd">
+
+    <!-- SPECIALIZATION -->
+    <changeSet id="001-1-specialization" author="deepan">
+        <createTable tableName="specializations">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_time" type="TIMESTAMP"/>
+            <column name="updated_time" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <!-- PATIENT -->
+    <changeSet id="001-2-patient" author="deepan">
+        <createTable tableName="patients">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(100)"/>
+            <column name="phone" type="VARCHAR(15)"/>
+            <column name="email" type="VARCHAR(120)"/>
+            <column name="gender" type="VARCHAR(20)"/>
+            <column name="age" type="INT"/>
+            <column name="address" type="TEXT"/>
+            <column name="created_time" type="TIMESTAMP"/>
+            <column name="updated_time" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <!-- DOCTOR -->
+    <changeSet id="001-3-doctor" author="deepan">
+        <createTable tableName="doctors">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(150)"/>
+            <column name="specialization_id" type="BIGINT"/>
+            <column name="phone" type="VARCHAR(15)"/>
+            <column name="status" type="VARCHAR(20)"/>
+            <column name="created_time" type="TIMESTAMP"/>
+            <column name="updated_time" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <!-- SERVICES -->
+    <changeSet id="001-4-services" author="deepan">
+        <createTable tableName="services">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(150)"/>
+            <column name="price" type="DECIMAL(10,2)"/>
+            <column name="status" type="VARCHAR(20)"/>
+            <column name="description" type="TEXT"/>
+            <column name="specialization_id" type="BIGINT"/>
+            <column name="created_time" type="TIMESTAMP"/>
+            <column name="updated_time" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <!-- BILL -->
+    <changeSet id="001-5-bill" author="deepan">
+        <createTable tableName="bills">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="bill_number" type="VARCHAR(50)"/>
+            <column name="patient_id" type="BIGINT"/>
+            <column name="doctor_id" type="BIGINT"/>
+            <column name="specialization_id" type="BIGINT"/>
+            <column name="doctor_name" type="VARCHAR(150)"/>
+            <column name="subtotal" type="DECIMAL(10,2)"/>
+            <column name="discount_amount" type="DECIMAL(10,2)"/>
+            <column name="discount_percent" type="DECIMAL(5,2)"/>
+            <column name="grand_total" type="DECIMAL(10,2)"/>
+            <column name="payment_mode" type="VARCHAR(20)"/>
+            <column name="status" type="VARCHAR(20)"/>
+            <column name="notes" type="TEXT"/>
+            <column name="created_time" type="TIMESTAMP"/>
+            <column name="updated_time" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <!-- BILL ITEMS -->
+    <changeSet id="001-6-bill-items" author="deepan">
+        <createTable tableName="bill_items">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="bill_id" type="BIGINT"/>
+            <column name="service_id" type="BIGINT"/>
+            <column name="service_name" type="VARCHAR(150)"/>
+            <column name="quantity" type="INT"/>
+            <column name="unit_price" type="DECIMAL(10,2)"/>
+            <column name="line_total" type="DECIMAL(10,2)"/>
+        </createTable>
+
+    </changeSet>
+
+    <changeSet id="002-fk" author="deepan">
+
+        <addForeignKeyConstraint
+                baseTableName="doctors" baseColumnNames="specialization_id"
+                referencedTableName="specializations" referencedColumnNames="id"
+                constraintName="fk_doctors_specialization"/>
+
+        <addForeignKeyConstraint
+                baseTableName="services" baseColumnNames="specialization_id"
+                referencedTableName="specializations" referencedColumnNames="id"
+                constraintName="fk_services_specialization"/>
+
+        <addForeignKeyConstraint
+                baseTableName="bills" baseColumnNames="patient_id"
+                referencedTableName="patients" referencedColumnNames="id"
+                constraintName="fk_bills_patient"/>
+
+        <addForeignKeyConstraint
+                baseTableName="bills" baseColumnNames="doctor_id"
+                referencedTableName="doctors" referencedColumnNames="id"
+                constraintName="fk_bills_doctor"/>
+
+        <addForeignKeyConstraint
+                baseTableName="bills" baseColumnNames="specialization_id"
+                referencedTableName="specializations" referencedColumnNames="id"
+                constraintName="fk_bills_specialization"/>
+
+        <addForeignKeyConstraint
+                baseTableName="bill_items" baseColumnNames="bill_id"
+                referencedTableName="bills" referencedColumnNames="id"
+                constraintName="fk_bill_items_bill"/>
+
+        <addForeignKeyConstraint
+                baseTableName="bill_items" baseColumnNames="service_id"
+                referencedTableName="services" referencedColumnNames="id"
+                constraintName="fk_bill_items_service"/>
+    </changeSet>
+
+</databaseChangeLog>

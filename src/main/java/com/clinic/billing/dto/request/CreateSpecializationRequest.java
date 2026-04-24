@@ -10,5 +10,5 @@ import lombok.*;
 public class CreateSpecializationRequest {
 
     private String name;
-    private Boolean isActive;
+    private String status;
 }

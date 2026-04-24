@@ -3,7 +3,10 @@ package com.clinic.billing.service.impl;
 import com.clinic.billing.dto.request.MedicalServiceRequest;
 import com.clinic.billing.dto.response.MedicalServiceResponse;
 import com.clinic.billing.entity.MedicalService;
+import com.clinic.billing.entity.Specialization;
+import com.clinic.billing.entity.enums.Status;
 import com.clinic.billing.repository.MedicalServiceRepository;
+import com.clinic.billing.repository.SpecializationRepository;
 import com.clinic.billing.service.MedicalServiceService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +21,10 @@ import java.util.List;
 public class MedicalServiceServiceImpl implements MedicalServiceService {
 
     private final MedicalServiceRepository medicalServiceRepository;
+    private final SpecializationRepository specializationRepository;
 
     public List<MedicalServiceResponse> getAllActiveServices() {
-        return medicalServiceRepository.findByIsActiveTrueOrderByNameAsc()
+        return medicalServiceRepository.findByStatus(Status.ACTIVE)
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
@@ -28,11 +32,15 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
 
     @Override
     public MedicalServiceResponse createMedicalService(MedicalServiceRequest request) {
+
+        Specialization specialization = findSpecialization(request.getSpecializationId());
+
         MedicalService medicalService = MedicalService.builder()
                 .name(request.getName())
                 .price(request.getPrice())
-                .gstPercentage(request.getGstPercentage())
-                .isActive(request.getIsActive())
+                .status(request.getStatus())
+                .specialization(specialization)
+                .description(request.getDescription())
                 .createdTime(LocalDateTime.now())
                 .updatedTime(LocalDateTime.now())
                 .build();
@@ -54,12 +62,8 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
             existingService.setPrice(request.getPrice());
         }
 
-        if (request.getGstPercentage() != null) {
-            existingService.setGstPercentage(request.getGstPercentage());
-        }
-
-        if (request.getIsActive() != null) {
-            existingService.setIsActive(request.getIsActive());
+        if (request.getStatus() != null) {
+            existingService.setStatus(request.getStatus());
         }
 
         existingService.setUpdatedTime(LocalDateTime.now());
@@ -74,7 +78,7 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
        MedicalService existingService = medicalServiceRepository.findById(id)
                .orElseThrow(() -> new RuntimeException("Medical Service with id " + id + " not found"));
 
-       existingService.setIsActive(false);
+       existingService.setStatus(Status.INACTIVE);
        existingService.setUpdatedTime(LocalDateTime.now());
 
        medicalServiceRepository.save(existingService);
@@ -84,9 +88,12 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
         return MedicalServiceResponse.builder()
                 .serviceId(medicalService.getId())
                 .serviceName(medicalService.getName())
-                .gstPercentage(medicalService.getGstPercentage())
                 .price(medicalService.getPrice())
                 .build();
+    }
+
+    private Specialization findSpecialization(Long id) {
+        return specializationRepository.findById(id).orElseThrow(() -> new RuntimeException("Specialization with id " + id + " not found"));
     }
 
 

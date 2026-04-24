@@ -11,5 +11,5 @@ public class CreateDoctorRequest {
     private String name;
     private Long specializationId;
     private String phone;
-    private Boolean isActive;
+    private String status;
 }
