@@ -18,9 +18,12 @@ public class MedicalServiceController {
     private final MedicalServiceService medicalServiceService;
 
     @GetMapping
-    public ResponseEntity<List<MedicalServiceResponse>> getActiveMedicalService(){
-        List<MedicalServiceResponse> allActiveServices = medicalServiceService.getAllActiveServices();
-        return ResponseEntity.ok().body(allActiveServices);
+    public ResponseEntity<List<MedicalServiceResponse>> getServices(@RequestParam(required = false) Long specializationId) {
+
+        if (specializationId != null) {
+            return ResponseEntity.ok(medicalServiceService.findBySpecializationById(specializationId));
+        }
+        return ResponseEntity.ok(medicalServiceService.getAllActiveServices());
     }
 
     @PostMapping

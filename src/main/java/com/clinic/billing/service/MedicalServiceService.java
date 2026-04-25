@@ -14,4 +14,6 @@ public interface MedicalServiceService {
     MedicalServiceResponse updateMedicalService(Long id, MedicalServiceRequest request);
 
     void deleteMedicalService(Long id);
+
+    List<MedicalServiceResponse> findBySpecializationById(Long specializationId);
 }

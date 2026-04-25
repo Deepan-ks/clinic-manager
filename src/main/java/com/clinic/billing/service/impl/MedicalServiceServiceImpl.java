@@ -84,6 +84,12 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
        medicalServiceRepository.save(existingService);
     }
 
+    @Override
+    public List<MedicalServiceResponse> findBySpecializationById(Long specializationId) {
+        List<MedicalService> services = medicalServiceRepository.findBySpecializationId(specializationId);
+        return services.stream().map(this::mapToResponse).toList();
+    }
+
     private MedicalServiceResponse mapToResponse(MedicalService medicalService) {
         return MedicalServiceResponse.builder()
                 .serviceId(medicalService.getId())

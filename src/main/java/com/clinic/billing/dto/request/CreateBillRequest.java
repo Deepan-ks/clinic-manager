@@ -18,6 +18,8 @@ public class CreateBillRequest {
     private Long doctorId;
     private Long specializationId;
 
+    private String doctorName;
+
     private String paymentMode;
     private String notes;
 
