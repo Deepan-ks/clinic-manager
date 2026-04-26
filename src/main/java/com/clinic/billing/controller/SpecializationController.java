@@ -3,6 +3,7 @@ package com.clinic.billing.controller;
 import com.clinic.billing.dto.request.CreateSpecializationRequest;
 import com.clinic.billing.dto.response.SpecializationResponse;
 import com.clinic.billing.service.SpecializationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class SpecializationController {
     private final SpecializationService service;
 
     @PostMapping
-    public ResponseEntity<SpecializationResponse> createSpecialization(@RequestBody CreateSpecializationRequest request) {
+    public ResponseEntity<SpecializationResponse> createSpecialization(@RequestBody @Valid CreateSpecializationRequest request) {
         SpecializationResponse response = service.createSpecialization(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -37,7 +38,7 @@ public class SpecializationController {
 
     @PutMapping("/{id}")
     public ResponseEntity<SpecializationResponse> updateSpecialization(@PathVariable Long id,
-                                         @RequestBody CreateSpecializationRequest request) {
+                                         @RequestBody @Valid CreateSpecializationRequest request) {
         SpecializationResponse response = service.updateSpecialization(id, request);
         return ResponseEntity.ok(response);
     }

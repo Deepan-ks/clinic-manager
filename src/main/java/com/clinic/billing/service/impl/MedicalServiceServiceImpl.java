@@ -5,6 +5,7 @@ import com.clinic.billing.dto.response.MedicalServiceResponse;
 import com.clinic.billing.entity.MedicalService;
 import com.clinic.billing.entity.Specialization;
 import com.clinic.billing.entity.enums.Status;
+import com.clinic.billing.exception.ResourceNotFoundException;
 import com.clinic.billing.repository.MedicalServiceRepository;
 import com.clinic.billing.repository.SpecializationRepository;
 import com.clinic.billing.service.MedicalServiceService;
@@ -52,7 +53,7 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
     public MedicalServiceResponse updateMedicalService(Long id, MedicalServiceRequest request) {
 
         MedicalService existingService = medicalServiceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Medical Service with id " + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Medical Service with id " + id + " not found"));
 
         if (request.getName() != null) {
             existingService.setName(request.getName());
@@ -75,13 +76,13 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
 
     @Override
     public void deleteMedicalService(Long id) {
-       MedicalService existingService = medicalServiceRepository.findById(id)
-               .orElseThrow(() -> new RuntimeException("Medical Service with id " + id + " not found"));
+        MedicalService existingService = medicalServiceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Medical Service with id " + id + " not found"));
 
-       existingService.setStatus(Status.INACTIVE);
-       existingService.setUpdatedTime(LocalDateTime.now());
+        existingService.setStatus(Status.INACTIVE);
+        existingService.setUpdatedTime(LocalDateTime.now());
 
-       medicalServiceRepository.save(existingService);
+        medicalServiceRepository.save(existingService);
     }
 
     @Override
@@ -99,8 +100,8 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
     }
 
     private Specialization findSpecialization(Long id) {
-        return specializationRepository.findById(id).orElseThrow(() -> new RuntimeException("Specialization with id " + id + " not found"));
+        return specializationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Specialization with id " + id + " not found"));
     }
-
 
 }

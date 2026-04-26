@@ -8,11 +8,13 @@ import com.clinic.billing.dto.response.BillResponse;
 import com.clinic.billing.entity.*;
 import com.clinic.billing.entity.enums.BillStatus;
 import com.clinic.billing.entity.enums.PaymentMode;
+import com.clinic.billing.entity.enums.Status;
 import com.clinic.billing.repository.*;
 import com.clinic.billing.service.BillingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.clinic.billing.exception.ResourceNotFoundException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -34,18 +36,18 @@ public class BillingServiceImpl implements BillingService {
     public BillResponse createBill(CreateBillRequest request) {
 
         Patient patient = patientRepository.findById(request.getPatientId())
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
 
         Doctor doctor = doctorRepository.findById(request.getDoctorId())
-                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
 
         Specialization specialization = specializationRepository
                 .findById(request.getSpecializationId())
-                .orElseThrow(() -> new RuntimeException("Specialization not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Specialization not found"));
 
         // 🔥 VALIDATION
         if (!doctor.getSpecialization().getId().equals(specialization.getId())) {
-            throw new RuntimeException("Doctor does not belong to specialization");
+            throw new ResourceNotFoundException("Doctor does not belong to specialization");
         }
 
         List<BillItem> billItems = new ArrayList<>();
@@ -54,11 +56,19 @@ public class BillingServiceImpl implements BillingService {
         for (BillItemRequest item : request.getItems()) {
 
             MedicalService service = medicalServiceRepository.findById(item.getServiceId())
-                    .orElseThrow(() -> new RuntimeException("Service not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
 
             // 🔥 VALIDATION
             if (!service.getSpecialization().getId().equals(specialization.getId())) {
-                throw new RuntimeException("Service does not belong to specialization");
+                throw new ResourceNotFoundException("Service does not belong to specialization");
+            }
+
+            if (service.getStatus().equals(Status.INACTIVE)) {
+                throw new ResourceNotFoundException("Service status is INACTIVE");
+            }
+
+            if (item.getQuantity() <= 0) {
+                throw new IllegalArgumentException("Quantity must be at least 1");
             }
 
             BigDecimal qty = BigDecimal.valueOf(item.getQuantity());
@@ -73,16 +83,17 @@ public class BillingServiceImpl implements BillingService {
                             .quantity(item.getQuantity())
                             .unitPrice(service.getPrice())
                             .lineTotal(lineTotal)
-                            .build()
-            );
+                            .build());
         }
 
         // 🔥 DISCOUNT LOGIC
         BigDecimal discountAmount = request.getDiscountAmount() != null
-                ? request.getDiscountAmount() : BigDecimal.ZERO;
+                ? request.getDiscountAmount()
+                : BigDecimal.ZERO;
 
         BigDecimal discountPercent = request.getDiscountPercent() != null
-                ? request.getDiscountPercent() : BigDecimal.ZERO;
+                ? request.getDiscountPercent()
+                : BigDecimal.ZERO;
 
         BigDecimal discountValue = discountPercent.compareTo(BigDecimal.ZERO) > 0
                 ? subtotal.multiply(discountPercent).divide(BigDecimal.valueOf(100))
@@ -92,7 +103,19 @@ public class BillingServiceImpl implements BillingService {
             discountValue = subtotal;
         }
 
+        if (discountPercent.compareTo(BigDecimal.valueOf(100)) > 0) {
+            throw new IllegalArgumentException("Discount cannot exceed 100%");
+        }
+
+        if (discountAmount.compareTo(subtotal) > 0) {
+            throw new IllegalArgumentException("Discount exceeds subtotal");
+        }
+
         BigDecimal total = subtotal.subtract(discountValue);
+
+        if (total.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Total cannot be negative");
+        }
 
         Bill bill = Bill.builder()
                 .billNumber(generateBillNumber())
@@ -118,7 +141,7 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     public BillResponse getBillById(Long id) {
-        Bill bill = billRepository.findById(id).orElseThrow(() -> new RuntimeException("Bill not found"));
+        Bill bill = billRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Bill not found"));
         return mapToResponse(bill);
     }
 
@@ -132,10 +155,10 @@ public class BillingServiceImpl implements BillingService {
     @Override
     public void cancelBill(Long billId, CancelBillRequest cancelBillRequest) {
         Bill bill = billRepository.findById(billId)
-                .orElseThrow(() -> new RuntimeException("Bill not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Bill not found"));
 
         if (bill.getStatus() == BillStatus.CANCELLED) {
-            throw new RuntimeException("Bill already cancelled");
+            throw new ResourceNotFoundException("Bill already cancelled");
         }
 
         // Update status
@@ -165,8 +188,7 @@ public class BillingServiceImpl implements BillingService {
                         .quantity(item.getQuantity())
                         .unitPrice(item.getUnitPrice())
                         .lineTotal(item.getLineTotal())
-                        .build()
-                )
+                        .build())
                 .toList();
 
         return BillResponse.builder()

@@ -8,6 +8,7 @@ import com.clinic.billing.repository.SpecializationRepository;
 import com.clinic.billing.service.SpecializationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.clinic.billing.exception.ResourceNotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,7 +18,6 @@ import java.util.List;
 public class SpecializationServiceImpl implements SpecializationService {
 
     private final SpecializationRepository specializationRepository;
-
 
     public SpecializationResponse createSpecialization(CreateSpecializationRequest req) {
         Specialization s = Specialization.builder()
@@ -59,7 +59,7 @@ public class SpecializationServiceImpl implements SpecializationService {
 
     private Specialization find(Long id) {
         return specializationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Specialization not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Specialization not found"));
     }
 
     private SpecializationResponse mapToResponse(Specialization s) {

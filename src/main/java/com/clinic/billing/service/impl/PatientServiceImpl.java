@@ -9,6 +9,7 @@ import com.clinic.billing.repository.PatientRepository;
 import com.clinic.billing.service.PatientService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import com.clinic.billing.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -40,7 +41,7 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public PatientResponse getPatient(Long id) {
-        Patient existingPatient = patientRepository.findById(id).orElseThrow(() -> new RuntimeException("patient not found"));
+        Patient existingPatient = patientRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
         return mapToPatientResponse(existingPatient);
     }
 
@@ -59,7 +60,7 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public PatientResponse updatePatient(Long id, UpdatePatientRequest request) {
-        Patient existingPatient =  patientRepository.findById(id).orElseThrow(() -> new RuntimeException("patient not found"));
+        Patient existingPatient =  patientRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
 
         if(request.getPhone() != null){
             existingPatient.setPhone(request.getPhone());

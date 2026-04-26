@@ -2,6 +2,8 @@ package com.clinic.billing.service.impl;
 
 import com.clinic.billing.entity.Bill;
 import com.clinic.billing.entity.BillItem;
+import com.clinic.billing.entity.enums.BillStatus;
+import com.clinic.billing.exception.ResourceNotFoundException;
 import com.clinic.billing.repository.BillRepository;
 import com.clinic.billing.service.InvoiceService;
 import com.itextpdf.io.image.ImageDataFactory;
@@ -33,7 +35,11 @@ public class InvoiceServiceImpl implements InvoiceService {
         public byte[] generateInvoice(Long billId) throws IOException {
 
                 Bill bill = billRepository.findById(billId)
-                                .orElseThrow(() -> new RuntimeException("Bill not found"));
+                                .orElseThrow(() -> new ResourceNotFoundException("Bill not found"));
+
+                if (bill.getStatus() == BillStatus.CANCELLED) {
+                        throw new IllegalArgumentException("Cannot generate invoice for cancelled bill");
+                }
 
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
 

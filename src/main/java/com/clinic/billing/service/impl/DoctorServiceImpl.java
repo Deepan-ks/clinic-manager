@@ -5,6 +5,7 @@ import com.clinic.billing.dto.response.DoctorResponse;
 import com.clinic.billing.entity.Doctor;
 import com.clinic.billing.entity.Specialization;
 import com.clinic.billing.entity.enums.Status;
+import com.clinic.billing.exception.ResourceNotFoundException;
 import com.clinic.billing.repository.DoctorRepository;
 import com.clinic.billing.repository.SpecializationRepository;
 import com.clinic.billing.service.DoctorService;
@@ -45,6 +46,7 @@ public class DoctorServiceImpl implements DoctorService {
                 : doctorRepository.findAll();
 
         return doctors.stream()
+                .filter(doctor -> doctor.getStatus() == Status.ACTIVE)
                 .map(this::mapToResponse)
                 .toList();
     }
@@ -83,12 +85,12 @@ public class DoctorServiceImpl implements DoctorService {
 
     private Doctor findDoctor(Long id) {
         return doctorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
     }
 
     private Specialization findSpecialization(Long id) {
         return specializationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Specialization not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Specialization not found"));
     }
 
     private DoctorResponse mapToResponse(Doctor d) {
