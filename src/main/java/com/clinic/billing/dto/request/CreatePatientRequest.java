@@ -19,6 +19,7 @@ public class CreatePatientRequest {
     private String name;
 
     @NotBlank(message = "Phone is required")
+    @Pattern(regexp = "\\d{10}", message = "Phone number must be exactly 10 digits")
     private String phone;
 
     @Min(value = 0, message = "Age cannot be negative")
