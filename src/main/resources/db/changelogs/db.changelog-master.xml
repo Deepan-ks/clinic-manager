@@ -6,4 +6,5 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
 
     <include file="db/changelogs/01.000.00/db.changelog-init.xml"/>
+    <include file="db/changelogs/01.000.00/db.changelog-create-table-bill-sequence.xml"/>
 </databaseChangeLog>

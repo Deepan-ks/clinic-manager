@@ -10,6 +10,7 @@ import com.clinic.billing.entity.enums.BillStatus;
 import com.clinic.billing.entity.enums.PaymentMode;
 import com.clinic.billing.entity.enums.Status;
 import com.clinic.billing.repository.*;
+import com.clinic.billing.service.BillSequenceService;
 import com.clinic.billing.service.BillingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.clinic.billing.exception.ResourceNotFoundException;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +32,9 @@ public class BillingServiceImpl implements BillingService {
     private final PatientRepository patientRepository;
     private final DoctorRepository doctorRepository;
     private final SpecializationRepository specializationRepository;
+    private final BillSequenceService billSequenceService;
+
+    private PaymentMode paymentMode;
 
     @Transactional
     @Override
@@ -47,7 +52,11 @@ public class BillingServiceImpl implements BillingService {
 
         // 🔥 VALIDATION
         if (!doctor.getSpecialization().getId().equals(specialization.getId())) {
-            throw new ResourceNotFoundException("Doctor does not belong to specialization");
+            throw new IllegalArgumentException("Doctor does not belong to specialization");
+        }
+
+        if (request.getItems() == null || request.getItems().isEmpty()) {
+            throw new IllegalArgumentException("At least one service is required");
         }
 
         List<BillItem> billItems = new ArrayList<>();
@@ -60,11 +69,11 @@ public class BillingServiceImpl implements BillingService {
 
             // 🔥 VALIDATION
             if (!service.getSpecialization().getId().equals(specialization.getId())) {
-                throw new ResourceNotFoundException("Service does not belong to specialization");
+                throw new IllegalArgumentException("Service does not belong to specialization");
             }
 
             if (service.getStatus().equals(Status.INACTIVE)) {
-                throw new ResourceNotFoundException("Service status is INACTIVE");
+                throw new IllegalArgumentException("Service status is INACTIVE");
             }
 
             if (item.getQuantity() <= 0) {
@@ -95,8 +104,13 @@ public class BillingServiceImpl implements BillingService {
                 ? request.getDiscountPercent()
                 : BigDecimal.ZERO;
 
+        if (discountAmount.compareTo(BigDecimal.ZERO) > 0 &&
+                discountPercent.compareTo(BigDecimal.ZERO) > 0) {
+            throw new IllegalArgumentException("Use either discount amount or percent, not both");
+        }
+
         BigDecimal discountValue = discountPercent.compareTo(BigDecimal.ZERO) > 0
-                ? subtotal.multiply(discountPercent).divide(BigDecimal.valueOf(100))
+                ? subtotal.multiply(discountPercent).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
                 : discountAmount;
 
         if (discountValue.compareTo(subtotal) > 0) {
@@ -118,7 +132,7 @@ public class BillingServiceImpl implements BillingService {
         }
 
         Bill bill = Bill.builder()
-                .billNumber(generateBillNumber())
+                .billNumber(getBillNumber())
                 .patient(patient)
                 .doctor(doctor)
                 .specialization(specialization)
@@ -127,7 +141,7 @@ public class BillingServiceImpl implements BillingService {
                 .discountAmount(discountValue)
                 .discountPercent(discountPercent)
                 .grandTotal(total)
-                .paymentMode(PaymentMode.valueOf(request.getPaymentMode()))
+                .paymentMode(paymentMode)
                 .status(BillStatus.ACTIVE)
                 .items(billItems)
                 .createdTime(LocalDateTime.now())
@@ -175,9 +189,8 @@ public class BillingServiceImpl implements BillingService {
         billRepository.save(bill);
     }
 
-    // Temporary bill number generator (we’ll improve later)
-    private String generateBillNumber() {
-        return "INV-" + System.currentTimeMillis();
+    private String getBillNumber() {
+        return billSequenceService.generateBillNumber();
     }
 
     private BillResponse mapToResponse(Bill bill) {

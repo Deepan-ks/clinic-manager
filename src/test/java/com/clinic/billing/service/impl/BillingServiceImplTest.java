@@ -9,6 +9,7 @@ import com.clinic.billing.entity.enums.BillStatus;
 import com.clinic.billing.entity.enums.PaymentMode;
 import com.clinic.billing.entity.enums.Status;
 import com.clinic.billing.exception.ResourceNotFoundException;
+import com.clinic.billing.service.BillSequenceService;
 import com.clinic.billing.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,9 @@ public class BillingServiceImplTest {
 
     @Mock
     private MedicalServiceRepository medicalServiceRepository;
+
+    @Mock
+    private BillSequenceService billSequenceService;
 
     @InjectMocks
     private BillingServiceImpl billingService;
@@ -89,6 +93,7 @@ public class BillingServiceImplTest {
         when(doctorRepository.findById(1L)).thenReturn(Optional.of(mockDoctor));
         when(specializationRepository.findById(1L)).thenReturn(Optional.of(mockSpecialization));
         when(medicalServiceRepository.findById(1L)).thenReturn(Optional.of(mockService));
+        when(billSequenceService.generateBillNumber()).thenReturn("BILL-100");
 
         Bill savedBill = Bill.builder()
                 .id(100L)
@@ -128,7 +133,7 @@ public class BillingServiceImplTest {
         Specialization differentSpec = Specialization.builder().id(2L).name("Neurology").build();
         when(specializationRepository.findById(1L)).thenReturn(Optional.of(differentSpec));
 
-        assertThrows(ResourceNotFoundException.class, () -> billingService.createBill(createBillRequest));
+        assertThrows(IllegalArgumentException.class, () -> billingService.createBill(createBillRequest));
     }
 
     @Test

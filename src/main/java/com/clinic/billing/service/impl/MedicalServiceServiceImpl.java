@@ -13,6 +13,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -35,6 +36,14 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
     public MedicalServiceResponse createMedicalService(MedicalServiceRequest request) {
 
         Specialization specialization = findSpecialization(request.getSpecializationId());
+
+        if (request.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Price must be greater than zero");
+        }
+
+        if (request.getSpecializationId() == null) {
+            throw new IllegalArgumentException("Specialization required");
+        }
 
         MedicalService medicalService = MedicalService.builder()
                 .name(request.getName())
