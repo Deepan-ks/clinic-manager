@@ -41,7 +41,7 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public PatientResponse getPatient(Long id) {
-        Patient existingPatient = patientRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
+        Patient existingPatient = patientRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(com.clinic.billing.utils.Constants.PATIENT_NOT_FOUND));
         return mapToPatientResponse(existingPatient);
     }
 
@@ -60,7 +60,7 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public PatientResponse updatePatient(Long id, UpdatePatientRequest request) {
-        Patient existingPatient =  patientRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
+        Patient existingPatient =  patientRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(com.clinic.billing.utils.Constants.PATIENT_NOT_FOUND));
 
         if(request.getPhone() != null){
             existingPatient.setPhone(request.getPhone());

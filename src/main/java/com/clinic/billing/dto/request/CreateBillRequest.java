@@ -11,6 +11,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.List;
+import com.clinic.billing.utils.Constants;
 
 @Getter
 @Setter
@@ -18,25 +19,25 @@ import java.util.List;
 @AllArgsConstructor
 public class CreateBillRequest {
 
-    @NotNull(message = "Patient ID is required")
+    @NotNull(message = Constants.PATIENT_ID_REQUIRED)
     private Long patientId;
 
-    @NotNull(message = "Doctor ID is required")
+    @NotNull(message = Constants.DOCTOR_ID_REQUIRED)
     private Long doctorId;
 
-    @NotNull(message = "Specialization ID is required")
+    @NotNull(message = Constants.SPECIALIZATION_ID_REQUIRED)
     private Long specializationId;
 
     private String doctorName;
 
-    @NotBlank(message = "Payment mode is required")
+    @NotBlank(message = Constants.PAYMENT_MODE_REQUIRED)
     private String paymentMode;
     private String notes;
 
     private BigDecimal discountAmount;
     private BigDecimal discountPercent;
 
-    @NotEmpty(message = "At least one item is required")
+    @NotEmpty(message = Constants.BILL_ITEMS_REQUIRED)
     @Valid
     private List<BillItemRequest> items;
 }

@@ -9,26 +9,28 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import com.clinic.billing.utils.Constants;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreatePatientRequest {
 
-    @NotBlank(message = "Name is required")
+    @NotBlank(message = Constants.NAME_REQUIRED)
     private String name;
 
-    @NotBlank(message = "Phone is required")
-    @Pattern(regexp = "\\d{10}", message = "Phone number must be exactly 10 digits")
+    @NotBlank(message = Constants.PHONE_REQUIRED)
+    @Pattern(regexp = "\\d{10}", message = Constants.INVALID_PHONE_FORMAT)
     private String phone;
 
-    @Min(value = 0, message = "Age cannot be negative")
+    @Min(value = 0, message = Constants.AGE_NEGATIVE)
     private Integer age;
 
-    @NotBlank(message = "Gender is required")
+    @NotBlank(message = Constants.GENDER_REQUIRED)
     private String gender;
 
-    @Email(message = "Email should be valid")
+    @Email(message = Constants.INVALID_EMAIL)
     private String email;
 
     private String address;

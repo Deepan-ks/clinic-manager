@@ -3,6 +3,7 @@ package com.clinic.billing.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import com.clinic.billing.utils.Constants;
 
 @Getter
 @Setter
@@ -10,15 +11,15 @@ import lombok.*;
 @AllArgsConstructor
 public class CreateDoctorRequest {
 
-    @NotBlank(message = "Name is required")
+    @NotBlank(message = Constants.NAME_REQUIRED)
     private String name;
 
-    @NotNull(message = "Specialization ID is required")
+    @NotNull(message = Constants.SPECIALIZATION_ID_REQUIRED)
     private Long specializationId;
 
-    @NotBlank(message = "Phone is required")
+    @NotBlank(message = Constants.PHONE_REQUIRED)
     private String phone;
 
-    @NotBlank(message = "Status is required")
+    @NotBlank(message = Constants.STATUS_REQUIRED)
     private String status;
 }

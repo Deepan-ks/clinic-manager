@@ -42,9 +42,9 @@ public class BillController {
     }
 
     @PatchMapping("/{id}/cancel")
-    public ResponseEntity<String> cancelBill(@PathVariable Long id, @RequestBody @Valid CancelBillRequest cancelBillRequest) {
+    public ResponseEntity<Void> cancelBill(@PathVariable Long id, @RequestBody @Valid CancelBillRequest cancelBillRequest) {
         billingService.cancelBill(id, cancelBillRequest);
-        return ResponseEntity.ok().body("Bill has been cancelled");
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/invoice")

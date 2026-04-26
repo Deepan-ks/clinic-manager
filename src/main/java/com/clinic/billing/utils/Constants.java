@@ -3,4 +3,42 @@ package com.clinic.billing.utils;
 public class Constants {
     public static final String ACTIVE_STATUS = "ACTIVE";
     public static final String INACTIVE_STATUS = "INACTIVE";
+
+    // Validation Messages
+    public static final String NAME_REQUIRED = "Name is required";
+    public static final String PHONE_REQUIRED = "Phone is required";
+    public static final String INVALID_PHONE_FORMAT = "Phone number must be exactly 10 digits";
+    public static final String AGE_NEGATIVE = "Age cannot be negative";
+    public static final String GENDER_REQUIRED = "Gender is required";
+    public static final String INVALID_EMAIL = "Email should be valid";
+    public static final String SPECIALIZATION_ID_REQUIRED = "Specialization ID is required";
+    public static final String STATUS_REQUIRED = "Status is required";
+    public static final String PRICE_REQUIRED = "Price is required";
+    public static final String SERVICE_ID_REQUIRED = "Service ID is required";
+    public static final String QUANTITY_REQUIRED = "Quantity is required";
+    public static final String QUANTITY_MIN = "Quantity must be at least 1";
+    public static final String PATIENT_ID_REQUIRED = "Patient ID is required";
+    public static final String DOCTOR_ID_REQUIRED = "Doctor ID is required";
+    public static final String PAYMENT_MODE_REQUIRED = "Payment mode is required";
+    public static final String BILL_ITEMS_REQUIRED = "At least one item is required";
+    public static final String CANCEL_REASON_REQUIRED = "Reason for cancellation is required";
+    public static final String SPECIALIZATION_NAME_REQUIRED = "Specialization name is required";
+
+    // Exception Messages
+    public static final String PATIENT_NOT_FOUND = "Patient not found";
+    public static final String DOCTOR_NOT_FOUND = "Doctor not found";
+    public static final String SPECIALIZATION_NOT_FOUND = "Specialization not found";
+    public static final String SERVICE_NOT_FOUND = "Service not found";
+    public static final String BILL_NOT_FOUND = "Bill not found";
+    public static final String DOCTOR_SPECIALIZATION_MISMATCH = "Doctor does not belong to specialization";
+    public static final String SERVICE_SPECIALIZATION_MISMATCH = "Service does not belong to specialization";
+    public static final String SERVICE_INACTIVE = "Service status is INACTIVE";
+    public static final String INVALID_DISCOUNT_PERCENT = "Discount cannot exceed 100%";
+    public static final String INVALID_DISCOUNT_AMOUNT = "Discount exceeds subtotal";
+    public static final String NEGATIVE_TOTAL = "Total cannot be negative";
+    public static final String BILL_ALREADY_CANCELLED = "Bill already cancelled";
+    public static final String INVOICE_GENERATION_FAILED = "Cannot generate invoice for cancelled bill";
+
+    private Constants() {
+    }
 }
