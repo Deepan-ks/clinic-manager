@@ -25,7 +25,7 @@ public class PatientController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPatient);
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<PatientResponse> getPatientById(@PathVariable Long id) {
         PatientResponse patient = patientService.getPatient(id);
         return ResponseEntity.ok().body(patient);
@@ -43,7 +43,7 @@ public class PatientController {
         return ResponseEntity.ok().body(patientList);
     }
 
-    @PutMapping("{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<PatientResponse> updatePatient(@PathVariable Long id, @RequestBody @Valid UpdatePatientRequest request) {
         PatientResponse updatedPatient = patientService.updatePatient(id, request);
         return ResponseEntity.ok().body(updatedPatient);

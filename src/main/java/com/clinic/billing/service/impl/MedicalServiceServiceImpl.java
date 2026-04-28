@@ -104,7 +104,10 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
         return MedicalServiceResponse.builder()
                 .serviceId(medicalService.getId())
                 .serviceName(medicalService.getName())
+                .description(medicalService.getDescription())
                 .price(medicalService.getPrice())
+                .status(medicalService.getStatus().name())
+                .specializationId(medicalService.getSpecialization().getId())
                 .build();
     }
 

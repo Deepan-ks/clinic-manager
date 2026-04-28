@@ -83,6 +83,7 @@ public class PatientServiceImpl implements PatientService {
                 .age(patient.getAge())
                 .address(patient.getAddress())
                 .patientPhone(patient.getPhone())
+                .email(patient.getEmail())
                 .build();
     }
 }

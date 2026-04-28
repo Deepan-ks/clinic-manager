@@ -12,5 +12,8 @@ import java.math.BigDecimal;
 public class MedicalServiceResponse {
     private Long serviceId;
     private String serviceName;
+    private String description;
     private BigDecimal price;
+    private String status;
+    private Long specializationId;
 }

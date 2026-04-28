@@ -31,11 +31,6 @@ public class DoctorController {
         return ResponseEntity.ok(response);
     }
 
-    // @GetMapping
-    // public ResponseEntity<List<DoctorResponse>> fetchAllDoctors(){
-    // List<DoctorResponse> response = doctorService.findAllDoctors();
-    // return ResponseEntity.ok(response);
-    // }
 
     @GetMapping("/{id}")
     public ResponseEntity<DoctorResponse> fetchByDoctorId(@PathVariable Long id) {
