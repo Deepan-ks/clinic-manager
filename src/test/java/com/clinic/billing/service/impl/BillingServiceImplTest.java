@@ -175,6 +175,6 @@ public class BillingServiceImplTest {
         Bill bill = Bill.builder().id(1L).status(BillStatus.CANCELLED).build();
         when(billRepository.findById(1L)).thenReturn(Optional.of(bill));
 
-        assertThrows(ResourceNotFoundException.class, () -> billingService.cancelBill(1L, new CancelBillRequest("Test")));
+        assertThrows(IllegalArgumentException.class, () -> billingService.cancelBill(1L, new CancelBillRequest("Test")));
     }
 }

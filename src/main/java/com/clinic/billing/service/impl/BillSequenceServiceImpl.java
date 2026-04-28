@@ -42,7 +42,6 @@ public class BillSequenceServiceImpl implements BillSequenceService {
         // 4. Increment and save
         int nextValue = sequence.getCurrentValue() + 1;
         sequence.setCurrentValue(nextValue);
-        sequence.setUpdatedTime(LocalDateTime.now());
 
         billSequenceRepository.save(sequence);
 
@@ -61,8 +60,6 @@ public class BillSequenceServiceImpl implements BillSequenceService {
             BillSequence seq = BillSequence.builder()
                     .monthYear(monthYear)
                     .currentValue(0)
-                    .createdTime(LocalDateTime.now())
-                    .updatedTime(LocalDateTime.now())
                     .build();
             billSequenceRepository.saveAndFlush(seq);
             log.info("Initialized new bill sequence for month: {}", monthYear);

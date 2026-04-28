@@ -23,10 +23,4 @@ public class BillSequence {
 
     @Column(name = "current_value", nullable = false)
     private Integer currentValue;
-
-    @Column(nullable = false)
-    private LocalDateTime createdTime;
-
-    @Column(nullable = false)
-    private LocalDateTime updatedTime;
 }
