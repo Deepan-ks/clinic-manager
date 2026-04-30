@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.clinic.billing.utils.Constants.PATIENT_NOT_FOUND;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -41,7 +43,7 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public PatientResponse getPatient(Long id) {
-        Patient existingPatient = patientRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(com.clinic.billing.utils.Constants.PATIENT_NOT_FOUND));
+        Patient existingPatient = patientRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(PATIENT_NOT_FOUND));
         return mapToPatientResponse(existingPatient);
     }
 
@@ -60,7 +62,7 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public PatientResponse updatePatient(Long id, UpdatePatientRequest request) {
-        Patient existingPatient =  patientRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(com.clinic.billing.utils.Constants.PATIENT_NOT_FOUND));
+        Patient existingPatient =  patientRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(PATIENT_NOT_FOUND));
 
         if(request.getPhone() != null){
             existingPatient.setPhone(request.getPhone());
@@ -71,6 +73,7 @@ public class PatientServiceImpl implements PatientService {
         if(request.getAddress() != null){
             existingPatient.setAddress(request.getAddress());
         }
+        existingPatient.setUpdatedTime(LocalDateTime.now());
         patientRepository.save(existingPatient);
         return mapToPatientResponse(existingPatient);
     }
@@ -84,6 +87,8 @@ public class PatientServiceImpl implements PatientService {
                 .address(patient.getAddress())
                 .patientPhone(patient.getPhone())
                 .email(patient.getEmail())
+                .createdDate(patient.getCreatedTime())
+                .updatedDate(patient.getUpdatedTime())
                 .build();
     }
 }

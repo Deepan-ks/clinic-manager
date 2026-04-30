@@ -2,6 +2,8 @@ package com.clinic.billing.dto.response;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Builder
@@ -15,4 +17,6 @@ public class PatientResponse {
     private String gender;
     private String patientPhone;
     private String email;
+    private LocalDateTime createdDate;
+    private LocalDateTime updatedDate;
 }
