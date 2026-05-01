@@ -14,12 +14,15 @@ import com.clinic.billing.service.BillSequenceService;
 import com.clinic.billing.service.BillingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.clinic.billing.exception.ResourceNotFoundException;
 import com.clinic.billing.utils.Constants;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -161,6 +164,16 @@ public class BillingServiceImpl implements BillingService {
         return billRepository.findAll().stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    @Override
+    public Page<BillResponse> getBills(String search, LocalDate fromDate, LocalDate toDate, Pageable pageable) {
+        String q = (search == null) ? "" : search.trim();
+        // Use extreme dates to represent "all time" if no filter is provided
+        LocalDateTime from = (fromDate != null) ? fromDate.atStartOfDay() : LocalDateTime.of(1900, 1, 1, 0, 0);
+        LocalDateTime to   = (toDate   != null) ? toDate.atTime(23, 59, 59) : LocalDateTime.of(2100, 12, 31, 23, 59);
+        return billRepository.findAllPaged(q, from, to, pageable)
+                .map(this::mapToResponse);
     }
 
     @Override

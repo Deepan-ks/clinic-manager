@@ -11,6 +11,8 @@ import com.clinic.billing.repository.SpecializationRepository;
 import com.clinic.billing.service.MedicalServiceService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -30,6 +32,13 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    @Override
+    public Page<MedicalServiceResponse> getServices(String search, Long specializationId, Pageable pageable) {
+        String q = (search == null) ? "" : search.trim();
+        return medicalServiceRepository.findAllPaged(q, specializationId, pageable)
+                .map(this::mapToResponse);
     }
 
     @Override

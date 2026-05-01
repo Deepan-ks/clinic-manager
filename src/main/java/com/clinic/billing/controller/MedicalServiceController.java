@@ -5,6 +5,9 @@ import com.clinic.billing.dto.response.MedicalServiceResponse;
 import com.clinic.billing.service.MedicalServiceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +21,23 @@ public class MedicalServiceController {
 
     private final MedicalServiceService medicalServiceService;
 
+    /**
+     * GET /api/v1/services?search=&specializationId=&page=0&size=20
+     * Returns Page<MedicalServiceResponse> when page param present, list otherwise.
+     */
     @GetMapping
-    public ResponseEntity<List<MedicalServiceResponse>> getServices(
-            @RequestParam(required = false) Long specializationId) {
+    public ResponseEntity<?> getServices(
+            @RequestParam(required = false, defaultValue = "") String search,
+            @RequestParam(required = false) Long specializationId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false, defaultValue = "20") int size) {
 
+        if (page != null) {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<MedicalServiceResponse> result = medicalServiceService.getServices(search, specializationId, pageable);
+            return ResponseEntity.ok(result);
+        }
+        // Legacy: filter by specialization or return all active
         if (specializationId != null) {
             return ResponseEntity.ok(medicalServiceService.findBySpecializationById(specializationId));
         }
@@ -47,5 +63,4 @@ public class MedicalServiceController {
         medicalServiceService.deleteMedicalService(id);
         return ResponseEntity.ok().body("Medical Service has been deleted");
     }
-
 }
