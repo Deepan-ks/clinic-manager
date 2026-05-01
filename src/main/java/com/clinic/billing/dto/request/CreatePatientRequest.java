@@ -33,5 +33,6 @@ public class CreatePatientRequest {
     @Email(message = Constants.INVALID_EMAIL)
     private String email;
 
+    @NotBlank(message = Constants.PATIENT_ADDRESS_REQUIRED)
     private String address;
 }

@@ -10,6 +10,8 @@ import lombok.*;
 public class DoctorResponse {
     private Long doctorId;
     private String doctorName;
+    private String phone;
+    private String status;
     private Long specializationId;
     private String specializationName;
 }

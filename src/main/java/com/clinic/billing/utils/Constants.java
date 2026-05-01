@@ -38,6 +38,7 @@ public class Constants {
     public static final String NEGATIVE_TOTAL = "Total cannot be negative";
     public static final String BILL_ALREADY_CANCELLED = "Bill already cancelled";
     public static final String INVOICE_GENERATION_FAILED = "Cannot generate invoice for cancelled bill";
+    public static final String PATIENT_ADDRESS_REQUIRED = "Patient  address is required";
 
     private Constants() {
     }

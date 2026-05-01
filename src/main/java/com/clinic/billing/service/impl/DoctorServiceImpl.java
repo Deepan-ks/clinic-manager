@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -23,6 +22,7 @@ public class DoctorServiceImpl implements DoctorService {
     private final DoctorRepository doctorRepository;
     private final SpecializationRepository specializationRepository;
 
+    @Override
     public DoctorResponse createDoctor(CreateDoctorRequest req) {
 
         Specialization spec = findSpecialization(req.getSpecializationId());
@@ -39,6 +39,7 @@ public class DoctorServiceImpl implements DoctorService {
         return mapToResponse(doctorRepository.save(doctor));
     }
 
+    @Override
     public List<DoctorResponse> getAllDoctorBySpecialization(Long specializationId) {
 
         List<Doctor> doctors = (specializationId != null)
@@ -51,10 +52,12 @@ public class DoctorServiceImpl implements DoctorService {
                 .toList();
     }
 
+    @Override
     public DoctorResponse getByDoctorId(Long id) {
         return mapToResponse(findDoctor(id));
     }
 
+    @Override
     public DoctorResponse updateDoctor(Long id, CreateDoctorRequest req) {
 
         Doctor doctor = findDoctor(id);
@@ -69,6 +72,7 @@ public class DoctorServiceImpl implements DoctorService {
         return mapToResponse(doctorRepository.save(doctor));
     }
 
+    @Override
     public void deleteDoctor(Long id) {
         Doctor doctor = findDoctor(id);
 
@@ -97,6 +101,8 @@ public class DoctorServiceImpl implements DoctorService {
         return DoctorResponse.builder()
                 .doctorId(d.getId())
                 .doctorName(d.getName())
+                .phone(d.getPhone())
+                .status(d.getStatus().name())
                 .specializationId(d.getSpecialization().getId())
                 .specializationName(d.getSpecialization().getName())
                 .build();

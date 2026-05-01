@@ -30,6 +30,8 @@ public class BillResponse {
     private String paymentMode;
     private String status;
 
+    private String notes;
+
     private List<BillItemResponse> items;
 
     private LocalDateTime createdTime;

@@ -11,4 +11,5 @@ public class SpecializationResponse {
 
     private Long specializationId;
     private String specializationName;
+    private String status;
 }

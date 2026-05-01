@@ -14,11 +14,15 @@ import com.clinic.billing.service.BillSequenceService;
 import com.clinic.billing.service.BillingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.clinic.billing.exception.ResourceNotFoundException;
+import com.clinic.billing.utils.Constants;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,29 +38,27 @@ public class BillingServiceImpl implements BillingService {
     private final SpecializationRepository specializationRepository;
     private final BillSequenceService billSequenceService;
 
-    private PaymentMode paymentMode;
-
     @Transactional
     @Override
     public BillResponse createBill(CreateBillRequest request) {
 
         Patient patient = patientRepository.findById(request.getPatientId())
-                .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Constants.PATIENT_NOT_FOUND));
 
         Doctor doctor = doctorRepository.findById(request.getDoctorId())
-                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Constants.DOCTOR_NOT_FOUND));
 
         Specialization specialization = specializationRepository
                 .findById(request.getSpecializationId())
-                .orElseThrow(() -> new ResourceNotFoundException("Specialization not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Constants.SPECIALIZATION_NOT_FOUND));
 
         // 🔥 VALIDATION
         if (!doctor.getSpecialization().getId().equals(specialization.getId())) {
-            throw new IllegalArgumentException("Doctor does not belong to specialization");
+            throw new IllegalArgumentException(Constants.DOCTOR_SPECIALIZATION_MISMATCH);
         }
 
         if (request.getItems() == null || request.getItems().isEmpty()) {
-            throw new IllegalArgumentException("At least one service is required");
+            throw new IllegalArgumentException(Constants.BILL_ITEMS_REQUIRED);
         }
 
         List<BillItem> billItems = new ArrayList<>();
@@ -65,19 +67,19 @@ public class BillingServiceImpl implements BillingService {
         for (BillItemRequest item : request.getItems()) {
 
             MedicalService service = medicalServiceRepository.findById(item.getServiceId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException(Constants.SERVICE_NOT_FOUND));
 
             // 🔥 VALIDATION
             if (!service.getSpecialization().getId().equals(specialization.getId())) {
-                throw new IllegalArgumentException("Service does not belong to specialization");
+                throw new IllegalArgumentException(Constants.SERVICE_SPECIALIZATION_MISMATCH);
             }
 
             if (service.getStatus().equals(Status.INACTIVE)) {
-                throw new IllegalArgumentException("Service status is INACTIVE");
+                throw new IllegalArgumentException(Constants.SERVICE_INACTIVE);
             }
 
             if (item.getQuantity() <= 0) {
-                throw new IllegalArgumentException("Quantity must be at least 1");
+                throw new IllegalArgumentException(Constants.QUANTITY_MIN);
             }
 
             BigDecimal qty = BigDecimal.valueOf(item.getQuantity());
@@ -109,21 +111,18 @@ public class BillingServiceImpl implements BillingService {
             throw new IllegalArgumentException("Use either discount amount or percent, not both");
         }
 
-        BigDecimal discountValue = discountPercent.compareTo(BigDecimal.ZERO) > 0
-                ? subtotal.multiply(discountPercent).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
-                : discountAmount;
-
-        if (discountValue.compareTo(subtotal) > 0) {
-            discountValue = subtotal;
-        }
-
+        // Validate limits BEFORE computing discountValue
         if (discountPercent.compareTo(BigDecimal.valueOf(100)) > 0) {
-            throw new IllegalArgumentException("Discount cannot exceed 100%");
+            throw new IllegalArgumentException(Constants.INVALID_DISCOUNT_PERCENT);
         }
 
         if (discountAmount.compareTo(subtotal) > 0) {
-            throw new IllegalArgumentException("Discount exceeds subtotal");
+            throw new IllegalArgumentException(Constants.INVALID_DISCOUNT_AMOUNT);
         }
+
+        BigDecimal discountValue = discountPercent.compareTo(BigDecimal.ZERO) > 0
+                ? subtotal.multiply(discountPercent).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
+                : discountAmount;
 
         BigDecimal total = subtotal.subtract(discountValue);
 
@@ -141,7 +140,7 @@ public class BillingServiceImpl implements BillingService {
                 .discountAmount(discountValue)
                 .discountPercent(discountPercent)
                 .grandTotal(total)
-                .paymentMode(paymentMode)
+                .paymentMode(PaymentMode.valueOf(request.getPaymentMode()))
                 .status(BillStatus.ACTIVE)
                 .items(billItems)
                 .createdTime(LocalDateTime.now())
@@ -155,7 +154,8 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     public BillResponse getBillById(Long id) {
-        Bill bill = billRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Bill not found"));
+        Bill bill = billRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(Constants.BILL_NOT_FOUND));
         return mapToResponse(bill);
     }
 
@@ -167,12 +167,22 @@ public class BillingServiceImpl implements BillingService {
     }
 
     @Override
+    public Page<BillResponse> getBills(String search, LocalDate fromDate, LocalDate toDate, Pageable pageable) {
+        String q = (search == null) ? "" : search.trim();
+        // Use extreme dates to represent "all time" if no filter is provided
+        LocalDateTime from = (fromDate != null) ? fromDate.atStartOfDay() : LocalDateTime.of(1900, 1, 1, 0, 0);
+        LocalDateTime to   = (toDate   != null) ? toDate.atTime(23, 59, 59) : LocalDateTime.of(2100, 12, 31, 23, 59);
+        return billRepository.findAllPaged(q, from, to, pageable)
+                .map(this::mapToResponse);
+    }
+
+    @Override
     public void cancelBill(Long billId, CancelBillRequest cancelBillRequest) {
         Bill bill = billRepository.findById(billId)
-                .orElseThrow(() -> new ResourceNotFoundException("Bill not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Constants.BILL_NOT_FOUND));
 
         if (bill.getStatus() == BillStatus.CANCELLED) {
-            throw new ResourceNotFoundException("Bill already cancelled");
+            throw new IllegalArgumentException(Constants.BILL_ALREADY_CANCELLED);
         }
 
         // Update status
@@ -217,6 +227,7 @@ public class BillingServiceImpl implements BillingService {
                 .discountPercent(bill.getDiscountPercent())
                 .paymentMode(bill.getPaymentMode().name())
                 .status(bill.getStatus().name())
+                .notes(bill.getNotes())
                 .items(itemResponses)
                 .createdTime(bill.getCreatedTime())
                 .build();

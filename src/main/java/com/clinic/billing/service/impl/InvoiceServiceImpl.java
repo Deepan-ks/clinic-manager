@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 @Service
 @RequiredArgsConstructor
@@ -138,14 +137,6 @@ public class InvoiceServiceImpl implements InvoiceService {
                 return out.toByteArray();
         }
 
-        private Image loadLogo() throws IOException {
-                InputStream is = getClass()
-                                .getClassLoader()
-                                .getResourceAsStream("static/images/Medismile Logo.jpg");
-
-                return new Image(ImageDataFactory.create(is.readAllBytes()))
-                                .scaleToFit(80, 80);
-        }
 
         private Cell infoCell(String title, String line1, String line2) {
                 return new Cell()

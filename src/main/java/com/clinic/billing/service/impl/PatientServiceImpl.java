@@ -10,10 +10,14 @@ import com.clinic.billing.service.PatientService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import com.clinic.billing.exception.ResourceNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.clinic.billing.utils.Constants.PATIENT_NOT_FOUND;
 
 @Service
 @Transactional
@@ -41,8 +45,16 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public PatientResponse getPatient(Long id) {
-        Patient existingPatient = patientRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(com.clinic.billing.utils.Constants.PATIENT_NOT_FOUND));
+        Patient existingPatient = patientRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(PATIENT_NOT_FOUND));
         return mapToPatientResponse(existingPatient);
+    }
+
+    @Override
+    public Page<PatientResponse> getPatients(String search, Pageable pageable) {
+        String q = (search == null) ? "" : search.trim();
+        return patientRepository.findAllPaged(q, pageable)
+                .map(this::mapToPatientResponse);
     }
 
     @Override
@@ -60,21 +72,22 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public PatientResponse updatePatient(Long id, UpdatePatientRequest request) {
-        Patient existingPatient =  patientRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(com.clinic.billing.utils.Constants.PATIENT_NOT_FOUND));
+        Patient existingPatient = patientRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(PATIENT_NOT_FOUND));
 
-        if(request.getPhone() != null){
+        if (request.getPhone() != null) {
             existingPatient.setPhone(request.getPhone());
         }
-        if(request.getEmail() != null){
+        if (request.getEmail() != null) {
             existingPatient.setEmail(request.getEmail());
         }
-        if(request.getAddress() != null){
+        if (request.getAddress() != null) {
             existingPatient.setAddress(request.getAddress());
         }
+        existingPatient.setUpdatedTime(LocalDateTime.now());
         patientRepository.save(existingPatient);
         return mapToPatientResponse(existingPatient);
     }
-
 
     private PatientResponse mapToPatientResponse(Patient patient) {
         return PatientResponse.builder().patientId(patient.getId())
@@ -83,6 +96,9 @@ public class PatientServiceImpl implements PatientService {
                 .age(patient.getAge())
                 .address(patient.getAddress())
                 .patientPhone(patient.getPhone())
+                .email(patient.getEmail())
+                .createdDate(patient.getCreatedTime())
+                .updatedDate(patient.getUpdatedTime())
                 .build();
     }
 }

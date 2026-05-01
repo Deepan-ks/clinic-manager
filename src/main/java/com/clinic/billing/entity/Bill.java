@@ -2,7 +2,6 @@ package com.clinic.billing.entity;
 
 import com.clinic.billing.entity.enums.BillStatus;
 import com.clinic.billing.entity.enums.PaymentMode;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,7 +23,6 @@ public class Bill {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JsonBackReference
     @Column(nullable = false, unique = true)
     private String billNumber;
 
