@@ -205,7 +205,8 @@ public class BillingServiceImpl implements BillingService {
 
     private BillResponse mapToResponse(Bill bill) {
 
-        List<BillItemResponse> itemResponses = bill.getItems().stream()
+        List<BillItemResponse> itemResponses = bill.getItems() == null ? new ArrayList<>()
+                : bill.getItems().stream()
                 .map(item -> BillItemResponse.builder()
                         .serviceName(item.getServiceName())
                         .quantity(item.getQuantity())
