@@ -45,8 +45,8 @@ public class BillSequenceServiceImpl implements BillSequenceService {
 
         billSequenceRepository.save(sequence);
 
-        // 5. Format: MS-COIM-2024-05-000001
-        return String.format("MS-COIM-%s-%06d", monthYear, nextValue);
+        // 5. Format: INV-COIM-2024-05-000001
+        return String.format("INV-COIM-%s-%06d", monthYear, nextValue);
     }
 
     /**
