@@ -9,14 +9,14 @@ import com.clinic.billing.exception.ResourceNotFoundException;
 import com.clinic.billing.repository.MedicalServiceRepository;
 import com.clinic.billing.repository.SpecializationRepository;
 import com.clinic.billing.service.MedicalServiceService;
+import com.clinic.billing.utils.Constants;
+import com.clinic.billing.utils.mapper.MedicalServiceMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -26,103 +26,74 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
 
     private final MedicalServiceRepository medicalServiceRepository;
     private final SpecializationRepository specializationRepository;
-
-    public List<MedicalServiceResponse> getAllActiveServices() {
-        return medicalServiceRepository.findByStatus(Status.ACTIVE)
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
-    }
+    private final MedicalServiceMapper medicalServiceMapper;
 
     @Override
     public Page<MedicalServiceResponse> getServices(String search, Long specializationId, Pageable pageable) {
-        String q = (search == null) ? "" : search.trim();
-        return medicalServiceRepository.findAllPaged(q, specializationId, pageable)
-                .map(this::mapToResponse);
+
+        String query = normalizeSearch(search);
+
+        return medicalServiceRepository.findAllPaged(query, specializationId, pageable)
+                .map(medicalServiceMapper::createMedicalServiceResponse);
     }
 
     @Override
     public MedicalServiceResponse createMedicalService(MedicalServiceRequest request) {
 
         Specialization specialization = findSpecialization(request.getSpecializationId());
-
-        if (request.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Price must be greater than zero");
-        }
-
-        if (request.getSpecializationId() == null) {
-            throw new IllegalArgumentException("Specialization required");
-        }
-
-        MedicalService medicalService = MedicalService.builder()
-                .name(request.getName())
-                .price(request.getPrice())
-                .status(request.getStatus())
-                .specialization(specialization)
-                .description(request.getDescription())
-                .createdTime(LocalDateTime.now())
-                .updatedTime(LocalDateTime.now())
-                .build();
+        MedicalService medicalService = medicalServiceMapper.createMedicalServiceEntity(request, specialization);
         MedicalService saved = medicalServiceRepository.save(medicalService);
-        return mapToResponse(saved);
+
+        return medicalServiceMapper.createMedicalServiceResponse(saved);
     }
 
     @Override
     public MedicalServiceResponse updateMedicalService(Long id, MedicalServiceRequest request) {
 
-        MedicalService existingService = medicalServiceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Medical Service with id " + id + " not found"));
+        MedicalService existingService = findMedicalServiceById(id);
+        MedicalService updateMedicalService = medicalServiceMapper.updateMedicalServiceEntity(existingService, request);
+        MedicalService saved = medicalServiceRepository.save(updateMedicalService);
 
-        if (request.getName() != null) {
-            existingService.setName(request.getName());
-        }
-
-        if (request.getPrice() != null) {
-            existingService.setPrice(request.getPrice());
-        }
-
-        if (request.getStatus() != null) {
-            existingService.setStatus(request.getStatus());
-        }
-
-        existingService.setUpdatedTime(LocalDateTime.now());
-
-        MedicalService saved = medicalServiceRepository.save(existingService);
-
-        return mapToResponse(saved);
+        return medicalServiceMapper.createMedicalServiceResponse(saved);
     }
 
     @Override
     public void deleteMedicalService(Long id) {
-        MedicalService existingService = medicalServiceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Medical Service with id " + id + " not found"));
 
+        MedicalService existingService = findMedicalServiceById(id);
         existingService.setStatus(Status.INACTIVE);
-        existingService.setUpdatedTime(LocalDateTime.now());
-
         medicalServiceRepository.save(existingService);
     }
 
     @Override
     public List<MedicalServiceResponse> findBySpecializationById(Long specializationId) {
-        List<MedicalService> services = medicalServiceRepository.findBySpecializationId(specializationId);
-        return services.stream().map(this::mapToResponse).toList();
+
+        return medicalServiceRepository.findBySpecializationId(specializationId)
+                .stream()
+                .map(medicalServiceMapper::createMedicalServiceResponse)
+                .toList();
     }
 
-    private MedicalServiceResponse mapToResponse(MedicalService medicalService) {
-        return MedicalServiceResponse.builder()
-                .serviceId(medicalService.getId())
-                .serviceName(medicalService.getName())
-                .description(medicalService.getDescription())
-                .price(medicalService.getPrice())
-                .status(medicalService.getStatus().name())
-                .specializationId(medicalService.getSpecialization().getId())
-                .build();
+    @Override
+    public List<MedicalServiceResponse> getAllActiveServices() {
+
+        return medicalServiceRepository.findByStatus(Status.ACTIVE)
+                .stream()
+                .map(medicalServiceMapper::createMedicalServiceResponse)
+                .toList();
+    }
+
+    private MedicalService findMedicalServiceById(Long id) {
+        return medicalServiceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(Constants.MEDICAL_SERVICE_NOT_FOUND));
     }
 
     private Specialization findSpecialization(Long id) {
         return specializationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Specialization with id " + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Constants.SPECIALIZATION_NOT_FOUND));
     }
 
+    private String normalizeSearch(String search) {
+        return search == null ? "" : search.trim();
+    }
 }

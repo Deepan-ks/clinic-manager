@@ -6,6 +6,7 @@ import com.clinic.billing.entity.Specialization;
 import com.clinic.billing.entity.enums.Status;
 import com.clinic.billing.repository.SpecializationRepository;
 import com.clinic.billing.service.SpecializationService;
+import com.clinic.billing.utils.mapper.SpecializationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.clinic.billing.exception.ResourceNotFoundException;
@@ -20,60 +21,47 @@ public class SpecializationServiceImpl implements SpecializationService {
 
     private final SpecializationRepository specializationRepository;
 
+    private final SpecializationMapper specializationMapper;
+
     @Override
     public SpecializationResponse createSpecialization(CreateSpecializationRequest req) {
-        Specialization s = Specialization.builder()
-                .name(req.getName())
-                .status(Status.valueOf(req.getStatus()))
-                .createdTime(LocalDateTime.now())
-                .updatedTime(LocalDateTime.now())
-                .build();
-
-        return mapToResponse(specializationRepository.save(s));
+        Specialization s = specializationMapper.createSpecializationEntity(req);
+        return specializationMapper.createSpecializationResponse(specializationRepository.save(s));
     }
 
     @Override
     public List<SpecializationResponse> getAllSpecialization() {
         return specializationRepository.findAll()
                 .stream()
-                .map(this::mapToResponse)
+                .map(specializationMapper::createSpecializationResponse)
                 .toList();
     }
 
     @Override
     public SpecializationResponse getBySpecializationId(Long id) {
-        return mapToResponse(find(id));
+        return specializationMapper.createSpecializationResponse(findSpecializationById(id));
     }
 
     @Override
     public SpecializationResponse updateSpecialization(Long id, CreateSpecializationRequest req) {
-        Specialization s = find(id);
-        s.setName(req.getName());
-        s.setStatus(Status.valueOf(req.getStatus()));
-        s.setUpdatedTime(LocalDateTime.now());
+        Specialization specialization = findSpecializationById(id);
+        Specialization updatedSpecialization = specializationMapper.updateSpecializationEntity(specialization, req);
 
-        return mapToResponse(specializationRepository.save(s));
+        return specializationMapper.createSpecializationResponse(specializationRepository.save(updatedSpecialization));
     }
 
     @Override
     public void deleteSpecialization(Long id) {
-        Specialization s = find(id);
+        Specialization specialization = findSpecializationById(id);
         // soft delete
-        s.setStatus(Status.INACTIVE);
-        specializationRepository.save(s);
+        specialization.setStatus(Status.INACTIVE);
+        specialization.setUpdatedTime(LocalDateTime.now());
+
+        specializationRepository.save(specialization);
     }
 
-    private Specialization find(Long id) {
+    private Specialization findSpecializationById(Long id) {
         return specializationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(Constants.SPECIALIZATION_NOT_FOUND));
     }
-
-    private SpecializationResponse mapToResponse(Specialization s) {
-        return SpecializationResponse.builder()
-                .specializationId(s.getId())
-                .specializationName(s.getName())
-                .status(s.getStatus().name())
-                .build();
-    }
-
 }

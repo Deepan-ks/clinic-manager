@@ -28,6 +28,7 @@ public class CreateBillRequest {
     @NotNull(message = Constants.SPECIALIZATION_ID_REQUIRED)
     private Long specializationId;
 
+    @NotBlank(message = Constants.DOCTOR_NAME_REQUIRED)
     private String doctorName;
 
     @NotBlank(message = Constants.PAYMENT_MODE_REQUIRED)

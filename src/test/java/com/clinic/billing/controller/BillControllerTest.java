@@ -45,6 +45,7 @@ public class BillControllerTest {
         request.setPatientId(1L);
         request.setDoctorId(1L);
         request.setSpecializationId(1L);
+        request.setDoctorName("Dr. Test");
         request.setPaymentMode("CASH");
         request.setItems(Arrays.asList(new BillItemRequest(1L, 1)));
 

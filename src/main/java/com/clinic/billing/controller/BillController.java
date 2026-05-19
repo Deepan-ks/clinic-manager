@@ -7,6 +7,7 @@ import com.clinic.billing.service.BillingService;
 import com.clinic.billing.service.InvoiceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +30,7 @@ public class BillController {
     private final InvoiceService invoiceService;
 
     @PostMapping
-    public ResponseEntity<BillResponse> generateBill(@RequestBody @Valid CreateBillRequest createBillRequest) {
+    public ResponseEntity<BillResponse> generateBill(@RequestBody @Valid CreateBillRequest createBillRequest) throws BadRequestException {
         BillResponse bill = billingService.createBill(createBillRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(bill);
     }

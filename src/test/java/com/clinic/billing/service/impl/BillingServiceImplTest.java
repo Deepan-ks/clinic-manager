@@ -11,6 +11,9 @@ import com.clinic.billing.entity.enums.Status;
 import com.clinic.billing.exception.ResourceNotFoundException;
 import com.clinic.billing.service.BillSequenceService;
 import com.clinic.billing.repository.*;
+import com.clinic.billing.utils.mapper.BillingMapper;
+import com.clinic.billing.utils.validator.BillingValidator;
+import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,6 +52,12 @@ public class BillingServiceImplTest {
     @Mock
     private BillSequenceService billSequenceService;
 
+    @Mock
+    private BillingValidator billingValidator;
+
+    @Mock
+    private BillingMapper billingMapper;
+
     @InjectMocks
     private BillingServiceImpl billingService;
 
@@ -83,12 +92,12 @@ public class BillingServiceImplTest {
         createBillRequest.setPatientId(1L);
         createBillRequest.setDoctorId(1L);
         createBillRequest.setSpecializationId(1L);
-        createBillRequest.setItems(Arrays.asList(itemRequest));
+        createBillRequest.setItems(List.of(itemRequest));
         createBillRequest.setPaymentMode("CASH");
     }
 
     @Test
-    void testCreateBill_Success() {
+    void testCreateBill_Success() throws Exception {
         when(patientRepository.findById(1L)).thenReturn(Optional.of(mockPatient));
         when(doctorRepository.findById(1L)).thenReturn(Optional.of(mockDoctor));
         when(specializationRepository.findById(1L)).thenReturn(Optional.of(mockSpecialization));
@@ -115,6 +124,14 @@ public class BillingServiceImplTest {
                         .build()))
                 .build();
 
+        doNothing().when(billingValidator).validateDoctorSpecialization(any(Doctor.class), any(Specialization.class));
+        doNothing().when(billingValidator).validateBillItemService(any(MedicalService.class), any(Specialization.class));
+        doNothing().when(billingValidator).validateDiscount(any(BigDecimal.class), any(BigDecimal.class), any(BigDecimal.class));
+        doNothing().when(billingValidator).validateTotal(any(BigDecimal.class));
+        when(billingMapper.createBillItemEntity(any(MedicalService.class), any(BillItemRequest.class), any(BigDecimal.class))).thenReturn(BillItem.builder().service(mockService).quantity(2).unitPrice(new BigDecimal("500.00")).lineTotal(new BigDecimal("1000.00")).build());
+        when(billingMapper.createBillEntity(anyString(), any(Patient.class), any(Doctor.class), any(Specialization.class), any(CreateBillRequest.class), any(BigDecimal.class), any(BigDecimal.class), any(BigDecimal.class), any(BigDecimal.class), any(PaymentMode.class), anyList())).thenReturn(savedBill);
+        when(billingMapper.createBillResponse(savedBill)).thenReturn(BillResponse.builder().billNumber("BILL-100").grandTotal(new BigDecimal("1000.00")).build());
+
         when(billRepository.save(any(Bill.class))).thenReturn(savedBill);
 
         BillResponse response = billingService.createBill(createBillRequest);
@@ -132,6 +149,7 @@ public class BillingServiceImplTest {
         
         Specialization differentSpec = Specialization.builder().id(2L).name("Neurology").build();
         when(specializationRepository.findById(1L)).thenReturn(Optional.of(differentSpec));
+        doThrow(new IllegalArgumentException()).when(billingValidator).validateDoctorSpecialization(mockDoctor, differentSpec);
 
         assertThrows(IllegalArgumentException.class, () -> billingService.createBill(createBillRequest));
     }
@@ -150,6 +168,7 @@ public class BillingServiceImplTest {
                 .build();
 
         when(billRepository.findById(1L)).thenReturn(Optional.of(bill));
+        when(billingMapper.createBillResponse(bill)).thenReturn(BillResponse.builder().billNumber("BILL-001").build());
 
         BillResponse response = billingService.getBillById(1L);
         assertNotNull(response);

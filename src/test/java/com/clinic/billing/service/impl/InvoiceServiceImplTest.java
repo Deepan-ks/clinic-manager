@@ -5,12 +5,14 @@ import com.clinic.billing.entity.Patient;
 import com.clinic.billing.entity.enums.BillStatus;
 import com.clinic.billing.exception.ResourceNotFoundException;
 import com.clinic.billing.repository.BillRepository;
+import com.clinic.billing.service.PdfService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Optional;
 import java.util.ArrayList;
 import java.math.BigDecimal;
@@ -24,6 +26,9 @@ public class InvoiceServiceImplTest {
 
     @Mock
     private BillRepository billRepository;
+
+    @Mock
+    private PdfService pdfService;
 
     @InjectMocks
     private InvoiceServiceImpl invoiceService;
@@ -57,6 +62,7 @@ public class InvoiceServiceImplTest {
                 .build();
 
         when(billRepository.findById(1L)).thenReturn(Optional.of(bill));
+        when(pdfService.buildPdf(bill)).thenReturn(new ByteArrayOutputStream());
 
         byte[] pdfBytes = invoiceService.generateInvoice(1L);
         
